@@ -25,15 +25,18 @@ else()
     message(STATUS "Example ${target}")
 endif()
 
-set(sources
-    main.cpp
-    WindowQt.cpp
-    WindowQt.h
-)
+
+file(GLOB SOURCE_FILES 
+    "*.h"
+    "*.hpp"
+    "*.cpp"
+    "*.vert"
+    "*.fraq"
+    )
 
 # Build executable
 add_executable(${target}
-    ${sources}
+    ${SOURCE_FILES}
 )
 
 target_include_directories(${target}
