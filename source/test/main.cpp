@@ -2,10 +2,11 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QSurfaceFormat>
+#include <QTimer>
+#include <spdlog/spdlog.h>
 #include "render_window.h"
 #include "ply_reader.h"
 #include "mesh_cloud.h"
-#include <QTimer>
 
 std::unique_ptr<RenderWindow> gRenderWindow;
 
@@ -19,6 +20,8 @@ void LoadMeshData()
 
 int main(int argc, char * argv[])
 {
+    spdlog::set_level(spdlog::level::trace);
+
     QApplication app(argc, argv);
 
     QSurfaceFormat format;

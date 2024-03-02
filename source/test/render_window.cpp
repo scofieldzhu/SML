@@ -71,7 +71,7 @@ void RenderWindow::loadMeshCloud(MeshCloudSPtr mesh_cloud)
     const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * sizeof(glm::vec3);
     corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
     vao_->binding(0)->setAttribute(0);
-    vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec2));
+    vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
     vao_->binding(0)->setFormat(2, GL_FLOAT);
     vao_->enable(0);
     updateGL();

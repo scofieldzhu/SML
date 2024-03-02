@@ -18,6 +18,6 @@ bool ply_reader::LoadFile(const QString& filename, VertexList& vertices)
     vertices.clear();
     for(const auto& pt : *cloud)
         vertices.push_back({pt.x, pt.y, pt.z});
-    SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!"), filename.toLocal8Bit().toStdString());
+    SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", vertices.size(), filename.toLocal8Bit().toStdString());
     return true;
 }
