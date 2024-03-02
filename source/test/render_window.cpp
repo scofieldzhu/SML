@@ -8,10 +8,12 @@
 #include <glbinding-aux/ContextInfo.h>
 #include <glbinding-aux/types_to_string.h>
 #include <globjects/logging.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include "mesh_cloud.h"
 using namespace gl;
+
+constexpr size_t kMaxVertexDataSize = 1024 * 1024 * 500;
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format)
@@ -56,16 +58,23 @@ bool RenderWindow::initializeGL()
     fragment_shader_ = globjects::Shader::create(GL_FRAGMENT_SHADER, fragment_shader_template_.get());
 
     program_->attach(vertex_shader_.get(), fragment_shader_.get());
+    return true;
+}
 
-    corner_buffer_->setData(std::array<glm::vec2, 4>{ {
-            glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1) } }, GL_STATIC_DRAW);
-
+void RenderWindow::loadMeshCloud(MeshCloudSPtr mesh_cloud)
+{
+    cur_mesh_cloud_ = mesh_cloud;
+    if(mesh_cloud->vertex_list.empty()){
+        globjects::debug() << "Mesh cloud contain a empty vertex list!" << std::endl;
+        return;
+    }
+    const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * sizeof(glm::vec3);
+    corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
     vao_->binding(0)->setAttribute(0);
     vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec2));
     vao_->binding(0)->setFormat(2, GL_FLOAT);
     vao_->enable(0);
-
-    return true;
+    updateGL();
 }
 
 void RenderWindow::deinitializeGL() 
@@ -89,27 +98,25 @@ void RenderWindow::resizeGL(QResizeEvent * event)
 void RenderWindow::paintGL() 
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     program_->use();
-    vao_->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    if(cur_mesh_cloud_ && cur_mesh_cloud_->isNonNull())
+        vao_->drawArrays(GL_TRIANGLE_STRIP, 0, cur_mesh_cloud_->vertex_list.size() / 3);
 }
 
 void RenderWindow::keyPressEvent(QKeyEvent * event) 
 {
     makeCurrent();
-
-    switch (event->key())
-    {
-    case Qt::Key_F5:
-        vertex_shader_source_->reload();
-        fragment_shader_source_->reload();
-        updateGL();
-        break;
-    case Qt::Key_Escape:
-        qApp->quit();
-        break;
-    default:
-        break;
+    switch (event->key()){
+        case Qt::Key_F5:
+            vertex_shader_source_->reload();
+            fragment_shader_source_->reload();
+            updateGL();
+            break;
+        case Qt::Key_Escape:
+            qApp->quit();
+            break;
+        default:
+            break;
     }
     doneCurrent();
 }

@@ -1,13 +1,12 @@
 #ifndef __ply_reader_h__
 #define __ply_reader_h__
 
-#include <glm/glm.hpp>
+#include "base_type_def.h"
 #include <QString>
-#include <QVector>
 
 namespace ply_reader
 {
-    bool LoadFile(const QString& file, QVector<glm::vec3>& result_points);
+    bool LoadFile(const QString& file, VertexList& result_points);
 };
 
 #endif

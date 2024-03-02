@@ -1,9 +1,10 @@
 
 find_package(glbinding REQUIRED)
-find_package(cpplocate REQUIRED)
+#find_package(cpplocate REQUIRED)
 find_package(Qt5Core    5.1)
 find_package(Qt5Gui     5.1)
 find_package(Qt5Widgets 5.1)
+find_package(PCL CONFIG REQUIRED)
 
 # Enable automoc
 set(CMAKE_AUTOMOC ON)
@@ -19,10 +20,10 @@ set(target test)
 
 # # Exit here if required dependencies are not met
 if (NOT Qt5Core_FOUND)
-    message(STATUS "Example ${target} skipped: Qt5 not found")
+    message(STATUS "${target} skipped: Qt5 not found")
     return()
 else()
-    message(STATUS "Example ${target}")
+    message(STATUS "${target}")
 endif()
 
 
@@ -49,14 +50,14 @@ target_include_directories(${target}
 target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
+    ${PCL_LIBRARIES}
     globjects::globjects
-    cpplocate::cpplocate
+    # cpplocate::cpplocate
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     spdlog::spdlog
 )
-
 
 # # 
 # # Compile definitions

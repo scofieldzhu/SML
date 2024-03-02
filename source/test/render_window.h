@@ -10,11 +10,13 @@
 #include <globjects/VertexAttributeBinding.h>
 #include <globjects/base/StaticStringSource.h>
 #include "WindowQt.h"
+#include "base_type_def.h"
 
 class RenderWindow : public WindowQt
 {
 public:
     bool initializeGL() override;
+    void loadMeshCloud(MeshCloudSPtr mesh_cloud);
     void deinitializeGL() override;
     void resizeGL(QResizeEvent * event) override;
     void paintGL() override;    
@@ -32,6 +34,7 @@ protected:
     std::unique_ptr<globjects::AbstractStringSource> fragment_shader_template_;
     std::unique_ptr<globjects::Shader> fragment_shader_;
     std::unique_ptr<globjects::VertexArray> vao_;
+    MeshCloudSPtr cur_mesh_cloud_;
 };
 
 #endif

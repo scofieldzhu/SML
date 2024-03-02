@@ -1,7 +1,7 @@
 #version 140
 #extension GL_ARB_explicit_attrib_location : require
 
-layout (location = 0) in vec2 corner;
+layout (location = 0) in vec4 corner;
 
 out vec4 color;
 
