@@ -1,4 +1,5 @@
 
+find_package(globjects)
 find_package(glbinding REQUIRED)
 #find_package(cpplocate REQUIRED)
 find_package(Qt5Core    5.1)
