@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: WindowQt.h 
+ *  File: cloud_mesh.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,54 +28,20 @@
  *  SOFTWARE.
  */
 
-#pragma once
+#ifndef __cloud_mesh_h__
+#define __cloud_mesh_h__
 
+#include "base_types.h"
 
-#include <QWindow>
-#include <QScopedPointer>
+GLMESH_NAMESPACE_BEGIN
 
-#include <glbinding/ProcAddress.h>
-
-
-class QSurfaceFormat;
-class QOpenGLContext;
-
-class WindowQt : public QWindow
+struct CloudMesh
 {
-public:
-    WindowQt(QApplication & app, const QSurfaceFormat & format);
-    virtual ~WindowQt();
-
-    virtual void resizeEvent(QResizeEvent * event) override;
-    virtual void exposeEvent(QExposeEvent * event) override;
-    bool event(QEvent * event) override;
-
-    virtual void enterEvent(QEvent * event);
-    virtual void leaveEvent(QEvent * event);
-
-    void makeCurrent();
-    void doneCurrent();
-
-    QOpenGLContext * context();
-
-    void updateGL();
-
-protected:
-    QScopedPointer<QOpenGLContext> m_context;
-
-    bool m_updatePending;
-    bool m_initialized;
-
-    void initialize();
-    void resize(QResizeEvent * event);
-    void paint();
-
-    virtual bool initializeGL();
-    virtual void deinitializeGL();
-    virtual void resizeGL(QResizeEvent * event);
-    virtual void paintGL();
-
-protected:
-    static WindowQt * s_getProcAddressHelper;
-    static glbinding::ProcAddress getProcAddress(const char * name);
+    bool isNull()const{ return vertex_list.empty(); }
+    bool isNonNull()const{ return !isNull(); }
+    VertexList vertex_list;
 };
+
+GLMESH_NAMESPACE_END
+
+#endif

@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: WindowQt.h 
+ *  File: vertex_array.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -27,55 +27,14 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+#include "vertex_array.h"
 
-#pragma once
+GLMESH_NAMESPACE_BEGIN
 
-
-#include <QWindow>
-#include <QScopedPointer>
-
-#include <glbinding/ProcAddress.h>
-
-
-class QSurfaceFormat;
-class QOpenGLContext;
-
-class WindowQt : public QWindow
+VertexArray::VertexArray()
 {
-public:
-    WindowQt(QApplication & app, const QSurfaceFormat & format);
-    virtual ~WindowQt();
+}
 
-    virtual void resizeEvent(QResizeEvent * event) override;
-    virtual void exposeEvent(QExposeEvent * event) override;
-    bool event(QEvent * event) override;
 
-    virtual void enterEvent(QEvent * event);
-    virtual void leaveEvent(QEvent * event);
+GLMESH_NAMESPACE_END
 
-    void makeCurrent();
-    void doneCurrent();
-
-    QOpenGLContext * context();
-
-    void updateGL();
-
-protected:
-    QScopedPointer<QOpenGLContext> m_context;
-
-    bool m_updatePending;
-    bool m_initialized;
-
-    void initialize();
-    void resize(QResizeEvent * event);
-    void paint();
-
-    virtual bool initializeGL();
-    virtual void deinitializeGL();
-    virtual void resizeGL(QResizeEvent * event);
-    virtual void paintGL();
-
-protected:
-    static WindowQt * s_getProcAddressHelper;
-    static glbinding::ProcAddress getProcAddress(const char * name);
-};

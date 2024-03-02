@@ -20,8 +20,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${build_bin})
 
 # add third parties directory to search path list
 list(APPEND CMAKE_PREFIX_PATH ${trd_root})
-find_package(globjects REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(glm REQUIRED)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/source
@@ -40,9 +40,9 @@ set(CMAKE_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include/agile_vision")
 set(CMAKE_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin")
 
-add_subdirectory(source/glmesh)
+add_subdirectory(source/glmesh/core)
 
-add_subdirectory(source/test)
+#add_subdirectory(source/glmesh/test)
 
 # install third-party libraries
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

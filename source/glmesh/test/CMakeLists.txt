@@ -17,7 +17,7 @@ set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 cmake_policy(SET CMP0020 NEW)
 
 # # Target name
-set(target test)
+set(target glmesh.test)
 
 # # Exit here if required dependencies are not met
 if (NOT Qt5Core_FOUND)
