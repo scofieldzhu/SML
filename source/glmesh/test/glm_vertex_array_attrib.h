@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_type_def.h 
+ *  File: glm_vertex_array_attrib.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,21 +28,23 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_type_def_h__
-#define __base_type_def_h__
+#ifndef __glm_vertex_array_attrib_h__
+#define __glm_vertex_array_attrib_h__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <cstdint>
+#include "base_type_def.h"
 
-using VertexList = std::vector<glm::vec3>;
+class glmVertexArrayAttrib
+{
+public:
+    void enable();
+    void disable();
+    void setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void* pointer);
+    uint32_t index()const;
+    glmVertexArrayAttrib(uint32_t index);
+    ~glmVertexArrayAttrib();
 
-struct MeshCloud;
-using MeshCloudSPtr = std::shared_ptr<MeshCloud>;
-
-class glmBuffer;
-class glmVertexArray;
-class glmVertexArrayAttrib;
+private:
+    uint32_t index_;
+};
 
 #endif

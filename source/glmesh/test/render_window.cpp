@@ -40,10 +40,9 @@
 #include <globjects/logging.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <spdlog/spdlog.h>
 #include "mesh_cloud.h"
 using namespace gl;
-
-constexpr size_t kMaxVertexDataSize = 1024 * 1024 * 500;
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format)
@@ -72,9 +71,9 @@ bool RenderWindow::initializeGL()
     globjects::debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
-    corner_buffer_ = globjects::Buffer::create();
+    // corner_buffer_ = globjects::Buffer::create();
     program_ = globjects::Program::create();
-    vao_ = globjects::VertexArray::create();
+    // vao_ = globjects::VertexArray::create();
 
     std::string data_path = QDir::currentPath().toStdString();
     std::string shader_v_path = data_path + "/shader.vert";        
@@ -88,6 +87,25 @@ bool RenderWindow::initializeGL()
     fragment_shader_ = globjects::Shader::create(GL_FRAGMENT_SHADER, fragment_shader_template_.get());
 
     program_->attach(vertex_shader_.get(), fragment_shader_.get());
+
+    //     const size_t vsize = sizeof(glm::vec3);
+    // //const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * vsize;
+    // //corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
+    // corner_buffer_->setData(sizeof(gTX), static_cast<gl::GLvoid*>(gTX), GL_STATIC_DRAW);
+    // vao_->binding(0)->setAttribute(0);
+    // //vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
+    // vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(float)*3);
+    // vao_->binding(0)->setFormat(3, GL_FLOAT);
+    // vao_->enable(0);
+
+        //     corner_buffer_->setData(std::array<glm::vec3, 4>{ {
+        //         glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(1, 1, 0) } }, GL_STATIC_DRAW);
+
+        // vao_->binding(0)->setAttribute(0);
+        // vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
+        // vao_->binding(0)->setFormat(3, GL_FLOAT);
+        // vao_->enable(0);
+    
     return true;
 }
 
@@ -98,11 +116,19 @@ void RenderWindow::loadMeshCloud(MeshCloudSPtr mesh_cloud)
         globjects::debug() << "Mesh cloud contain a empty vertex list!" << std::endl;
         return;
     }
-    const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * sizeof(glm::vec3);
+    // mesh_cloud->vertex_list.clear();
+    // mesh_cloud->vertex_list.push_back({0.0, 0.0, 0.0});
+    // mesh_cloud->vertex_list.push_back({1.0, 0.0, 0.0});
+    // mesh_cloud->vertex_list.push_back({0.0, 1.0, 0.0});
+    // mesh_cloud->vertex_list.push_back({1.0, 1.0, 0.0});
+    corner_buffer_ = globjects::Buffer::create();
+    vao_ = globjects::VertexArray::create();
+    const size_t vsize = sizeof(glm::vec3);
+    const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * vsize;
     corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
     vao_->binding(0)->setAttribute(0);
     vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
-    vao_->binding(0)->setFormat(2, GL_FLOAT);
+    vao_->binding(0)->setFormat(3, GL_FLOAT);
     vao_->enable(0);
     updateGL();
 }
@@ -127,10 +153,31 @@ void RenderWindow::resizeGL(QResizeEvent * event)
 
 void RenderWindow::paintGL() 
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
     program_->use();
-    if(cur_mesh_cloud_ && cur_mesh_cloud_->isNonNull())
-        vao_->drawArrays(GL_TRIANGLE_STRIP, 0, cur_mesh_cloud_->vertex_list.size() / 3);
+    
+    if(vao_){
+        glBindVertexArray( 0 );
+        //vao_->bind();
+        vao_->enable(0);
+    }
+    
+
+    glm::vec3 eye(0.0, 0.0, 10.0);
+    glm::vec3 focal(0.0, 0.0, 0.0);
+    glm::vec3 viewup(0.0, 1.0, 0.0);
+    glm::mat4 view_mat = glm::lookAt(eye, focal, viewup);
+    program_->setUniform("view_mat", view_mat);
+    glm::mat4 model_mat = glm::identity<glm::mat4>();
+    program_->setUniform("model_mat", model_mat);
+    glm::mat4 project_mat = glm::identity<glm::mat4>();
+    program_->setUniform("project_mat", project_mat);
+    if(cur_mesh_cloud_ && cur_mesh_cloud_->isNonNull()){
+        vao_->drawArrays(GL_POINTS, 0, cur_mesh_cloud_->vertex_list.size());
+        spdlog::info("draw arrays finsihed! {}", cur_mesh_cloud_->vertex_list.size());
+    }
+        
 }
 
 void RenderWindow::keyPressEvent(QKeyEvent * event) 

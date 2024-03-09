@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_type_def.h 
+ *  File: glm_vertex_array.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,21 +28,36 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_type_def_h__
-#define __base_type_def_h__
+#include "glm_vertex_array.h"
+#include "glad/glad.h"
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <cstdint>
+glmVertexArray::glmVertexArray()
+{
+    glGenVertexArrays(1, &id_);
+}
 
-using VertexList = std::vector<glm::vec3>;
+glmVertexArray::~glmVertexArray()
+{
+}
 
-struct MeshCloud;
-using MeshCloudSPtr = std::shared_ptr<MeshCloud>;
+void glmVertexArray::bindCurrent()
+{
+    glBindVertexArray(id_);
+}
 
-class glmBuffer;
-class glmVertexArray;
-class glmVertexArrayAttrib;
+void glmVertexArray::bindBuffer(uint32_t buffer_id)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+}
 
-#endif
+glmVertexArrayAttrib* glmVertexArray::getAttrib(uint32_t index)
+{
+    auto it = attrib_map_.find(index);
+    if(it != attrib_map_.end()){
+        return (*it).second.get();
+    }
+    auto attrib = std::make_unique<glmVertexArrayAttrib>(index);
+    auto attrib_pointer = attrib.get();
+    attrib_map_.insert({index, std::move(attrib)});
+    return attrib_pointer;
+}

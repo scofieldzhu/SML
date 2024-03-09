@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_type_def.h 
+ *  File: mesh_renderer.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,21 +28,24 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_type_def_h__
-#define __base_type_def_h__
+#ifndef __mesh_renderer_h__
+#define __mesh_renderer_h__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <cstdint>
+#include <QOpenglFunctions>
+#include "glmesh/core/base_types.h"
+#include "glmesh/core/glmesh_export.h"
 
-using VertexList = std::vector<glm::vec3>;
+GLMESH_NAMESPACE_BEGIN
 
-struct MeshCloud;
-using MeshCloudSPtr = std::shared_ptr<MeshCloud>;
+class GLMESH_API MeshRenderer : public QOpenGLFunctions
+{
+public: 
+    void initialize();
+    void render(uint32_t width, uint32_t height);
+    MeshRenderer();
+    ~MeshRenderer();
+};
 
-class glmBuffer;
-class glmVertexArray;
-class glmVertexArrayAttrib;
+GLMESH_NAMESPACE_END
 
 #endif

@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: vertex_array.cpp 
+ *  File: glm_vertex_array_attrib.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -27,14 +27,30 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-#include "vertex_array.h"
 
-GLMESH_NAMESPACE_BEGIN
+#include "glm_vertex_array_attrib.h"
+#include "glad/glad.h"
 
-VertexArray::VertexArray()
+glmVertexArrayAttrib::glmVertexArrayAttrib(uint32_t index)
+    :index_(index)
 {
 }
 
+glmVertexArrayAttrib::~glmVertexArrayAttrib()
+{
+}
 
-GLMESH_NAMESPACE_END
+void glmVertexArrayAttrib::enable()
+{
+    glEnableVertexAttribArray(index_);
+}
 
+void glmVertexArrayAttrib::disable()
+{
+    glDisableVertexAttribArray(index_);
+}
+
+void glmVertexArrayAttrib::setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void *pointer)
+{
+    glVertexAttribPointer(index_, size, type, normalized, stride, pointer);
+}

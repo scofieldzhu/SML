@@ -36,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}
     ${DEFAULT_LIBRARIES}
     Qt5::Core
     Qt5::Widgets
+    globjects::globjects
     spdlog::spdlog
     glm::glm
 )

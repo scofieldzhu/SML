@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: vertex_array.h 
+ *  File: glm_shader_program.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,21 +28,24 @@
  *  SOFTWARE.
  */
 
-#ifndef __vertex_array_h__
-#define __vertex_array_h__
+#ifndef __glm_shader_program_h__
+#define __glm_shader_program_h__
 
-#include "glmesh/core/base_types.h"
-#include "glmesh_export.h"
+#include "base_type_def.h"
 
-GLMESH_NAMESPACE_BEGIN
-
-class GLMESH_API VertexArray
+class glmShaderProgram
 {
 public:
-    VertexArray();
+    uint32_t addShaderFile(const char* filename, uint32_t shader_type); 
+    bool link();
+    uint32_t id()const{ return id_; }
+    glmShaderProgram();
+    ~glmShaderProgram();
 
+private:
+    void releaseShaders();
+    uint32_t id_ = 0;
+    std::vector<uint32_t> shaders_;
 };
-
-GLMESH_NAMESPACE_END
 
 #endif
