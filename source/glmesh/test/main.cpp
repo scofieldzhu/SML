@@ -32,17 +32,18 @@
 #include <QMainWindow>
 #include <QSurfaceFormat>
 #include <QTimer>
+#include <QThread>
 #include <spdlog/spdlog.h>
 #include "render_window.h"
 #include "ply_reader.h"
-#include "mesh_cloud.h"
+#include "glm_mesh.h"
 
 std::unique_ptr<RenderWindow> gRenderWindow;
 
 void LoadMeshData()
 {
     QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
-    MeshCloudSPtr mesh_cloud = std::make_shared<MeshCloud>();
+    glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
     ply_reader::LoadFile(data_file, mesh_cloud->vertex_list);
     gRenderWindow->loadMeshCloud(mesh_cloud);
 }
@@ -51,14 +52,17 @@ int main(int argc, char * argv[])
 {
     spdlog::set_level(spdlog::level::trace);
 
+    spdlog::info("Main thread id:{}", QThread::currentThreadId());
+
     QApplication app(argc, argv);
 
     QSurfaceFormat format;
 #ifdef __APPLE__
-    format.setVersion(3, 2);
+    format.setVersion(4, 6);
     format.setProfile(QSurfaceFormat::CoreProfile);
 #else
-    format.setVersion(3, 1);
+    format.setVersion(4, 6);
+    format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
     format.setDepthBufferSize(16);
 

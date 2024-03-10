@@ -64,11 +64,12 @@
 
 glmBuffer::glmBuffer()
 {
-    glCreateBuffers(0, &id_);
+    glCreateBuffers(1, &id_);
 }
 
 glmBuffer::~glmBuffer()
 {
+    glDeleteBuffers(1, &id_);
 }
 
 void glmBuffer::allocate(uint32_t size, void* data, uint32_t flags)

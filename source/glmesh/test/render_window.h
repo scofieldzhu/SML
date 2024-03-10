@@ -31,14 +31,6 @@
 #ifndef __render_window_h__
 #define __render_window_h__
 
-#include <globjects/globjects.h>
-#include <globjects/base/File.h>
-#include <globjects/Buffer.h>
-#include <globjects/Program.h>
-#include <globjects/Shader.h>
-#include <globjects/VertexArray.h>
-#include <globjects/VertexAttributeBinding.h>
-#include <globjects/base/StaticStringSource.h>
 #include "WindowQt.h"
 #include "base_type_def.h"
 
@@ -46,7 +38,7 @@ class RenderWindow : public WindowQt
 {
 public:
     bool initializeGL() override;
-    void loadMeshCloud(MeshCloudSPtr mesh_cloud);
+    void loadMeshCloud(glmMeshPtr mesh_cloud);
     void deinitializeGL() override;
     void resizeGL(QResizeEvent * event) override;
     void paintGL() override;    
@@ -55,16 +47,20 @@ public:
     virtual ~RenderWindow();
 
 protected:
-    std::unique_ptr<globjects::Buffer> corner_buffer_;
-    std::unique_ptr<globjects::Program> program_;
-    std::unique_ptr<globjects::File> vertex_shader_source_;
-    std::unique_ptr<globjects::AbstractStringSource> vertex_shader_template_;
-    std::unique_ptr<globjects::Shader> vertex_shader_;
-    std::unique_ptr<globjects::File> fragment_shader_source_;
-    std::unique_ptr<globjects::AbstractStringSource> fragment_shader_template_;
-    std::unique_ptr<globjects::Shader> fragment_shader_;
-    std::unique_ptr<globjects::VertexArray> vao_;
-    MeshCloudSPtr cur_mesh_cloud_;
+    glmMeshPtr cur_mesh_cloud_;
+    glmBufferPtr buffer_;
+    glmVertexArrayPtr vao_;
+    glmShaderProgramPtr program_;
+    glm::mat4 model_;
+    glm::mat4 view_;
+    glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 20.0f);
+    glm::vec3 focal_point_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 viewup_ = glm::vec3(0.0f, 1.0f, 0.0f);
+    float win_aspect_ = 1.0f;
+    float near_plane_dist_ = 0.0f;
+    float far_plane_dist_ = 2.0f;
+    float fovy_ = glm::radians(45.0f);
+    glm::mat4 projection_;
 };
 
 #endif

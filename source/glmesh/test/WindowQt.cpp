@@ -61,8 +61,7 @@ WindowQt::WindowQt(QApplication & app, const QSurfaceFormat & format)
     }
 
     QSurfaceFormat f(format);
-    f.setRenderableType(QSurfaceFormat::OpenGL);
-
+    f.setRenderableType(QSurfaceFormat::OpenGL);   
     setSurfaceType(OpenGLSurface);
     create();
 

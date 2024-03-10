@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: mesh_cloud.h 
+ *  File: glm_mesh.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,16 +28,18 @@
  *  SOFTWARE.
  */
 
-#ifndef __mesh_cloud_h__
-#define __mesh_cloud_h__
+#include "glm_mesh.h"
 
-#include "base_type_def.h"
-
-struct MeshCloud
+glmBoundingBox glmMesh::calcBoundingBox() const
 {
-    bool isNull()const{ return vertex_list.empty(); }
-    bool isNonNull()const{ return !isNull(); }
-    VertexList vertex_list;
-};
-
-#endif
+    glmBoundingBox box;
+    for(const auto& v : vertex_list) {
+        box.min.x = std::min(box.min.x, v.x);
+        box.min.y = std::min(box.min.y, v.y);
+        box.min.z = std::min(box.min.z, v.z);
+        box.max.x = std::max(box.max.x, v.x);
+        box.max.y = std::max(box.max.y, v.y);
+        box.max.z = std::max(box.max.z, v.z);
+    }
+    return box;
+}

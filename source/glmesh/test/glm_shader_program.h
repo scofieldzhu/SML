@@ -36,13 +36,17 @@
 class glmShaderProgram
 {
 public:
-    uint32_t addShaderFile(const char* filename, uint32_t shader_type); 
-    bool link();
+    uint32_t addShaderFile(const char* filename, uint32_t shader_type);  
+    bool link();   
+    void use();
+    int32_t getUniformLocation(const char* name)const;
+    void setUniformMatrix4fv(int32_t location, const glm::mat4& mat)const;
+    void setUniformMatrix4fv(const char* name, const glm::mat4& mat)const;
     uint32_t id()const{ return id_; }
     glmShaderProgram();
     ~glmShaderProgram();
 
-private:
+private:    
     void releaseShaders();
     uint32_t id_ = 0;
     std::vector<uint32_t> shaders_;

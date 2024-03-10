@@ -33,16 +33,17 @@
 #include <QDir>
 #include <QResizeEvent>
 #include <QApplication>
-#include <glbinding/gl/gl.h>
-#include <glbinding/Version.h>
-#include <glbinding-aux/ContextInfo.h>
-#include <glbinding-aux/types_to_string.h>
-#include <globjects/logging.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <spdlog/spdlog.h>
-#include "mesh_cloud.h"
-using namespace gl;
+#include "glm_mesh.h"
+#include <glad/glad.h>
+#include "glm_buffer.h"
+#include "glm_vertex_array.h"
+#include "glm_vertex_array_attrib.h"
+#include "glm_shader_program.h"
+
+#define BUFFER_OFFSET(a) ((void*)(a))
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format)
@@ -55,129 +56,102 @@ RenderWindow::~RenderWindow()
 
 bool RenderWindow::initializeGL() 
 {
-    globjects::init(getProcAddress);
+    if(!gladLoadGL()){
+        spdlog::error("gladLoadGL failed!");
+        return false;
+    }
+    program_ = std::make_shared<glmShaderProgram>();
+    if(!program_->addShaderFile("shader.vert", GL_VERTEX_SHADER))
+        return false;
+    if(!program_->addShaderFile("shader.frag", GL_FRAGMENT_SHADER))
+        return false;
+    if(!program_->link())
+        return false;
+    program_->use();
 
-    std::cout << std::endl
-        << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
-        << "OpenGL Vendor:   " << glbinding::aux::ContextInfo::vendor() << std::endl
-        << "OpenGL Renderer: " << glbinding::aux::ContextInfo::renderer() << std::endl << std::endl;
-
-    globjects::DebugMessage::enable();
-
-#ifdef __APPLE__
-    globjects::Shader::clearGlobalReplacements();
-    globjects::Shader::globalReplace("#version 140", "#version 150");
-
-    globjects::debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
-#endif
-
-    // corner_buffer_ = globjects::Buffer::create();
-    program_ = globjects::Program::create();
-    // vao_ = globjects::VertexArray::create();
-
-    std::string data_path = QDir::currentPath().toStdString();
-    std::string shader_v_path = data_path + "/shader.vert";        
-    vertex_shader_source_ = globjects::Shader::sourceFromFile(shader_v_path);
-    vertex_shader_template_ = globjects::Shader::applyGlobalReplacements(vertex_shader_source_.get());
-    vertex_shader_ = globjects::Shader::create(GL_VERTEX_SHADER, vertex_shader_template_.get());
-
-    std::string shader_f_path = data_path + "/shader.frag";
-    fragment_shader_source_ = globjects::Shader::sourceFromFile(shader_f_path);
-    fragment_shader_template_ = globjects::Shader::applyGlobalReplacements(fragment_shader_source_.get());
-    fragment_shader_ = globjects::Shader::create(GL_FRAGMENT_SHADER, fragment_shader_template_.get());
-
-    program_->attach(vertex_shader_.get(), fragment_shader_.get());
-
-    //     const size_t vsize = sizeof(glm::vec3);
-    // //const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * vsize;
-    // //corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
-    // corner_buffer_->setData(sizeof(gTX), static_cast<gl::GLvoid*>(gTX), GL_STATIC_DRAW);
-    // vao_->binding(0)->setAttribute(0);
-    // //vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
-    // vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(float)*3);
-    // vao_->binding(0)->setFormat(3, GL_FLOAT);
-    // vao_->enable(0);
-
-        //     corner_buffer_->setData(std::array<glm::vec3, 4>{ {
-        //         glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(1, 1, 0) } }, GL_STATIC_DRAW);
-
-        // vao_->binding(0)->setAttribute(0);
-        // vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
-        // vao_->binding(0)->setFormat(3, GL_FLOAT);
-        // vao_->enable(0);
-    
+    model_ = glm::identity<glm::mat4>();
+    program_->setUniformMatrix4fv("model", model_);
+    view_  = glm::lookAt(eye_, focal_point_, viewup_);
+    program_->setUniformMatrix4fv("view", view_);
+    win_aspect_ = (float)width() / (float)height();
+    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    program_->setUniformMatrix4fv("projection", projection_);
     return true;
 }
 
-void RenderWindow::loadMeshCloud(MeshCloudSPtr mesh_cloud)
+void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
+    makeCurrent();
     cur_mesh_cloud_ = mesh_cloud;
     if(mesh_cloud->vertex_list.empty()){
-        globjects::debug() << "Mesh cloud contain a empty vertex list!" << std::endl;
+        spdlog::warn("Mesh cloud contain a empty vertex list!");
         return;
     }
-    // mesh_cloud->vertex_list.clear();
-    // mesh_cloud->vertex_list.push_back({0.0, 0.0, 0.0});
-    // mesh_cloud->vertex_list.push_back({1.0, 0.0, 0.0});
-    // mesh_cloud->vertex_list.push_back({0.0, 1.0, 0.0});
-    // mesh_cloud->vertex_list.push_back({1.0, 1.0, 0.0});
-    corner_buffer_ = globjects::Buffer::create();
-    vao_ = globjects::VertexArray::create();
-    const size_t vsize = sizeof(glm::vec3);
-    const gl::GLsizeiptr kDataSize = mesh_cloud->vertex_list.size() * vsize;
-    corner_buffer_->setData(kDataSize, static_cast<gl::GLvoid*>(mesh_cloud->vertex_list.data()), GL_STATIC_DRAW);
-    vao_->binding(0)->setAttribute(0);
-    vao_->binding(0)->setBuffer(corner_buffer_.get(), 0, sizeof(glm::vec3));
-    vao_->binding(0)->setFormat(3, GL_FLOAT);
-    vao_->enable(0);
+    auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
+    glm::vec3 center_point = glm::vec3(
+        (boundingbox.min[0] + boundingbox.max[0]) / 2.0f,
+        (boundingbox.min[1] + boundingbox.max[1]) / 2.0f,
+        (boundingbox.min[2] + boundingbox.max[2]) / 2.0f
+    );
+    float diagonal_len = boundingbox.calcDiagonalLength();
+    spdlog::info("diagonal_len:{}", diagonal_len);
+    //translate center of point cloud to origin point {0.0, 0.0, 0.0}
+    model_ = glm::translate(glm::mat4(1.0), -center_point);
+    program_->setUniformMatrix4fv("model", model_);
+    view_  = glm::lookAt({0.0f, 0.0f, diagonal_len / 2.0f}, focal_point_, viewup_);
+    program_->setUniformMatrix4fv("view", view_);
+    far_plane_dist_ = diagonal_len;
+    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    program_->setUniformMatrix4fv("projection", projection_);
+
+    buffer_ = std::make_shared<glmBuffer>();
+    const GLuint kTotalSize = kVertexSize * mesh_cloud->vertex_list.size();
+    buffer_->allocate(kTotalSize, mesh_cloud->vertex_list.data(), 0);
+    vao_ = std::make_shared<glmVertexArray>();
+    vao_->bindCurrent();
+    vao_->bindBuffer(buffer_->id());
+    vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+    vao_->getAttrib(0)->enable();
+
+    glm::mat4 final_mat = projection_ * view_ * model_;
+    glm::vec4 transformed_point = final_mat * glm::vec4(center_point, 1.0);
+    spdlog::info("focal_point:[{},{}, {}] transformed point:[{},{}, {}]", 
+        center_point[0], center_point[1], center_point[2], 
+        transformed_point[0]/transformed_point[3], transformed_point[1]/transformed_point[3], transformed_point[2]/transformed_point[3]
+    );
+
     updateGL();
+    doneCurrent();
 }
 
 void RenderWindow::deinitializeGL() 
 {
-    corner_buffer_.reset(nullptr);
-    program_.reset(nullptr);
-    vertex_shader_source_.reset(nullptr);
-    vertex_shader_template_.reset(nullptr);
-    vertex_shader_.reset(nullptr);
-    fragment_shader_source_.reset(nullptr);
-    fragment_shader_template_.reset(nullptr);
-    fragment_shader_.reset(nullptr);
-    vao_.reset(nullptr);
+    program_.reset();
+    buffer_.reset();
+    vao_.reset();
 }
 
 void RenderWindow::resizeGL(QResizeEvent * event) 
 {
-    glViewport(0, 0, event->size().width(), event->size().height());
+    makeCurrent();
+    const auto& new_size = event->size();
+    glViewport(0, 0, new_size.width(), new_size.height());
+    win_aspect_ = new_size.width() / new_size.height();
+    spdlog::trace("new_w:{} new_h:{} cur_w:{} cur_h:{}", new_size.width(), new_size.height(), width(), height());
+    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    program_->setUniformMatrix4fv("projection", projection_);
+    doneCurrent();
 }
 
 void RenderWindow::paintGL() 
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
-    program_->use();
-    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     if(vao_){
-        glBindVertexArray( 0 );
-        //vao_->bind();
-        vao_->enable(0);
+        vao_->bindCurrent();
+        glDrawArrays(GL_POINTS, 0, cur_mesh_cloud_->vertex_list.size());
     }
-    
-
-    glm::vec3 eye(0.0, 0.0, 10.0);
-    glm::vec3 focal(0.0, 0.0, 0.0);
-    glm::vec3 viewup(0.0, 1.0, 0.0);
-    glm::mat4 view_mat = glm::lookAt(eye, focal, viewup);
-    program_->setUniform("view_mat", view_mat);
-    glm::mat4 model_mat = glm::identity<glm::mat4>();
-    program_->setUniform("model_mat", model_mat);
-    glm::mat4 project_mat = glm::identity<glm::mat4>();
-    program_->setUniform("project_mat", project_mat);
-    if(cur_mesh_cloud_ && cur_mesh_cloud_->isNonNull()){
-        vao_->drawArrays(GL_POINTS, 0, cur_mesh_cloud_->vertex_list.size());
-        spdlog::info("draw arrays finsihed! {}", cur_mesh_cloud_->vertex_list.size());
-    }
-        
+    spdlog::info("PaintGL called!");
 }
 
 void RenderWindow::keyPressEvent(QKeyEvent * event) 
@@ -185,8 +159,8 @@ void RenderWindow::keyPressEvent(QKeyEvent * event)
     makeCurrent();
     switch (event->key()){
         case Qt::Key_F5:
-            vertex_shader_source_->reload();
-            fragment_shader_source_->reload();
+            // vertex_shader_source_->reload();
+            // fragment_shader_source_->reload();
             updateGL();
             break;
         case Qt::Key_Escape:
