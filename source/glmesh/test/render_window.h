@@ -32,7 +32,7 @@
 #define __render_window_h__
 
 #include "WindowQt.h"
-#include "base_type_def.h"
+#include "glm_win_event_handler_publisher.h"
 
 class RenderWindow : public WindowQt
 {
@@ -40,20 +40,24 @@ public:
     bool initializeGL() override;
     void loadMeshCloud(glmMeshPtr mesh_cloud);
     void deinitializeGL() override;
-    void resizeGL(QResizeEvent * event) override;
+    void resizeGL(QResizeEvent* event) override;
     void paintGL() override;    
-    void keyPressEvent(QKeyEvent * event) override;    
-    RenderWindow(QApplication & app, QSurfaceFormat & format);
+    void keyPressEvent(QKeyEvent* event) override;    
+    glmWinEventHandlerPublisher* handlerRegister(){ return handler_register_.get(); }
+    RenderWindow(QApplication& app, QSurfaceFormat& format);
     virtual ~RenderWindow();
 
 protected:
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
     glmMeshPtr cur_mesh_cloud_;
     glmBufferPtr buffer_;
     glmVertexArrayPtr vao_;
     glmShaderProgramPtr program_;
     glm::mat4 model_;
     glm::mat4 view_;
-    glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 20.0f);
+    glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 1.0f);
     glm::vec3 focal_point_ = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 viewup_ = glm::vec3(0.0f, 1.0f, 0.0f);
     float win_aspect_ = 1.0f;
@@ -61,6 +65,7 @@ protected:
     float far_plane_dist_ = 2.0f;
     float fovy_ = glm::radians(45.0f);
     glm::mat4 projection_;
+    std::unique_ptr<glmWinEventHandlerPublisher> handler_register_;
 };
 
 #endif

@@ -46,12 +46,52 @@
 #define BUFFER_OFFSET(a) ((void*)(a))
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
-    :WindowQt(app, format)
+    :WindowQt(app, format),
+    handler_register_(std::make_unique<glmWinEventHandlerPublisher>())
 {
 }
 
 RenderWindow::~RenderWindow()
 {
+}
+
+void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
+{
+    WindowQt::mouseReleaseEvent(event);
+    spdlog::debug("mouseReleaseEvent:{}", (int)event->button());
+
+    glmWinEvent target_event;
+    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
+    target_event.type = glmWinEvent::ET_RELEASE;
+    target_event.event_button_id = event->button();
+    target_event.pos = {event->pos().x(), event->pos().x()};
+    handler_register_->publish(target_event);
+}
+
+void RenderWindow::mouseMoveEvent(QMouseEvent* event)
+{
+    WindowQt::mouseMoveEvent(event);
+    spdlog::debug("mouseMoveEvent:{}", (int)event->button());
+
+    glmWinEvent target_event;
+    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
+    target_event.type = glmWinEvent::ET_MOVE;
+    target_event.event_button_id = event->button();
+    target_event.pos = {event->pos().x(), event->pos().x()};
+    handler_register_->publish(target_event);
+}
+
+void RenderWindow::mousePressEvent(QMouseEvent* event)
+{
+    WindowQt::mousePressEvent(event);
+    spdlog::debug("mousePressEvent:{}", (int)event->button());
+
+    glmWinEvent target_event;
+    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
+    target_event.type = glmWinEvent::ET_PRESSE;
+    target_event.event_button_id = event->button();
+    target_event.pos = {event->pos().x(), event->pos().x()};
+    handler_register_->publish(target_event);
 }
 
 bool RenderWindow::initializeGL() 
@@ -88,19 +128,16 @@ void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
         return;
     }
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
-    glm::vec3 center_point = glm::vec3(
-        (boundingbox.min[0] + boundingbox.max[0]) / 2.0f,
-        (boundingbox.min[1] + boundingbox.max[1]) / 2.0f,
-        (boundingbox.min[2] + boundingbox.max[2]) / 2.0f
-    );
+    glm::vec3 center_point = boundingbox.calcCenter();
     float diagonal_len = boundingbox.calcDiagonalLength();
     spdlog::info("diagonal_len:{}", diagonal_len);
     //translate center of point cloud to origin point {0.0, 0.0, 0.0}
     model_ = glm::translate(glm::mat4(1.0), -center_point);
     program_->setUniformMatrix4fv("model", model_);
-    view_  = glm::lookAt({0.0f, 0.0f, diagonal_len / 2.0f}, focal_point_, viewup_);
+    eye_ = {0.0f, 0.0f, diagonal_len};
+    view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
-    far_plane_dist_ = diagonal_len;
+    far_plane_dist_ = 1.6 * diagonal_len;
     projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 
@@ -136,7 +173,7 @@ void RenderWindow::resizeGL(QResizeEvent * event)
     makeCurrent();
     const auto& new_size = event->size();
     glViewport(0, 0, new_size.width(), new_size.height());
-    win_aspect_ = new_size.width() / new_size.height();
+    win_aspect_ = (float)new_size.width() / (float)new_size.height();
     spdlog::trace("new_w:{} new_h:{} cur_w:{} cur_h:{}", new_size.width(), new_size.height(), width(), height());
     projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);

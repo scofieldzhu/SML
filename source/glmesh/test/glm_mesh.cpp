@@ -43,3 +43,14 @@ glmBoundingBox glmMesh::calcBoundingBox() const
     }
     return box;
 }
+
+glm::vec3 glmMesh::calcCenterPoint() const
+{
+    glm::vec3 center(0.0f, 0.0f, 0.0f);
+    for(const auto& v : vertex_list){
+        center[0] += v[0];
+        center[1] += v[1];
+        center[2] += v[2];
+    }
+    return  center * (1.0f / vertex_list.size());
+}

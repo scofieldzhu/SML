@@ -38,6 +38,7 @@ struct glmMesh
     bool isNull()const{ return vertex_list.empty(); }
     bool isNonNull()const{ return !isNull(); }
     glmBoundingBox calcBoundingBox()const;
+    glm::vec3 calcCenterPoint()const;
     VertexList vertex_list;
 };
 

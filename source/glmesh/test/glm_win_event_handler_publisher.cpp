@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_type_def.h 
+ *  File: glm_win_event_handler_publisher.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,38 +28,44 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_type_def_h__
-#define __base_type_def_h__
+#include "glm_win_event_handler_publisher.h"
+#include <algorithm>
+#include "glm_win_event_handler.h"
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <cstdint>
-#include <numeric>
-
-using VertexList = std::vector<glm::vec3>;
-
-constexpr uint32_t kVertexSize = sizeof(glm::vec3);
-
-struct glmMesh;
-using glmMeshPtr = std::shared_ptr<glmMesh>;
-
-class glmBuffer;
-using glmBufferPtr = std::shared_ptr<glmBuffer>;
-
-class glmVertexArray;
-using glmVertexArrayPtr = std::shared_ptr<glmVertexArray>;
-
-class glmVertexArrayAttrib;
-class glmShaderProgram;
-using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
-
-struct glmBoundingBox
+glmWinEventHandlerPublisher::glmWinEventHandlerPublisher()
 {
-    glm::vec3 calcCenter()const{ return {(min[0] + max[0]) / 2.0, (min[1] + max[1]) / 2.0, (min[2] + max[2]) / 2.0}; }
-    float calcDiagonalLength()const{ return glm::distance(min, max); }
-    glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
-    glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
-};
+}
 
-#endif
+glmWinEventHandlerPublisher::~glmWinEventHandlerPublisher()
+{
+}
+
+void glmWinEventHandlerPublisher::publish(const glmWinEvent& event)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    for(auto h : handlers_){
+        h->handleEvent(event);
+    }
+}
+
+void glmWinEventHandlerPublisher::addHandler(glmWinEventHandler *e)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    if(e){
+        handlers_.push_back(e);
+    }
+}
+
+void glmWinEventHandlerPublisher::removeHandler(glmWinEventHandler* e)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    if(e){
+        handlers_.erase(std::remove(handlers_.begin(), handlers_.end(), e));
+    }
+}
+
+void glmWinEventHandlerPublisher::clear()
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    handlers_.clear();
+}

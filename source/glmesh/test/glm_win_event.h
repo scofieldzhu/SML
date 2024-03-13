@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_type_def.h 
+ *  File: glm_win_event.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,38 +28,51 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_type_def_h__
-#define __base_type_def_h__
+#ifndef __glm_win_event_h__
+#define __glm_win_event_h__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <cstdint>
-#include <numeric>
+#include "base_type_def.h"
 
-using VertexList = std::vector<glm::vec3>;
-
-constexpr uint32_t kVertexSize = sizeof(glm::vec3);
-
-struct glmMesh;
-using glmMeshPtr = std::shared_ptr<glmMesh>;
-
-class glmBuffer;
-using glmBufferPtr = std::shared_ptr<glmBuffer>;
-
-class glmVertexArray;
-using glmVertexArrayPtr = std::shared_ptr<glmVertexArray>;
-
-class glmVertexArrayAttrib;
-class glmShaderProgram;
-using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
-
-struct glmBoundingBox
+struct glmWinEvent
 {
-    glm::vec3 calcCenter()const{ return {(min[0] + max[0]) / 2.0, (min[1] + max[1]) / 2.0, (min[2] + max[2]) / 2.0}; }
-    float calcDiagonalLength()const{ return glm::distance(min, max); }
-    glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
-    glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
+    enum EventSource
+    {
+        ES_NULL,
+        ES_MOUSE_DEVICE,
+        ES_KEYBOARD
+    };
+    
+    enum MouseButton
+    {
+        MB_NULL,
+        MB_LEFT,
+        MB_RIGHT,
+        MB_MIDDLE
+    };
+    
+    enum EventType
+    {
+        ET_NULL,
+        ET_PRESSE,
+        ET_DOUBLE_PRESS,
+        ET_RELEASE,
+        ET_MOVE,
+        ET_WHEEL_SCROLL
+    };
+    
+    enum ScrollDirection
+    {
+        SD_NULL,
+        SD_DOWN,
+        SD_UP
+    };
+
+    EventSource source = ES_NULL;
+    EventType type = ET_NULL;
+    int event_button_id = -1;
+    ScrollDirection scroll_direction = SD_NULL;
+    float scroll_angle = 0.0f;
+    glm::vec2 pos{0.0f, 0.0f};
 };
 
 #endif
