@@ -42,13 +42,16 @@
 #include "glm_vertex_array.h"
 #include "glm_vertex_array_attrib.h"
 #include "glm_shader_program.h"
+#include "glm_trackball.h"
 
 #define BUFFER_OFFSET(a) ((void*)(a))
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format),
-    handler_register_(std::make_unique<glmWinEventHandlerPublisher>())
+    handler_register_(std::make_unique<glmWinEventHandlerPublisher>()),
+    trackball_(std::make_unique<glmTrackball>())
 {
+    handler_register_->addHandler(trackball_.get());
 }
 
 RenderWindow::~RenderWindow()
@@ -64,7 +67,7 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_RELEASE;
     target_event.event_button_id = event->button();
-    target_event.pos = {event->pos().x(), event->pos().x()};
+    target_event.pos = {event->pos().x(), event->pos().y()};
     handler_register_->publish(target_event);
 }
 
@@ -77,7 +80,7 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_MOVE;
     target_event.event_button_id = event->button();
-    target_event.pos = {event->pos().x(), event->pos().x()};
+    target_event.pos = {event->pos().x(), event->pos().y()};
     handler_register_->publish(target_event);
 }
 
@@ -90,7 +93,7 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_PRESSE;
     target_event.event_button_id = event->button();
-    target_event.pos = {event->pos().x(), event->pos().x()};
+    target_event.pos = {event->pos().x(), event->pos().y()};
     handler_register_->publish(target_event);
 }
 

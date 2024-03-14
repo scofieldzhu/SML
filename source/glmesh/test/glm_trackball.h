@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: render_window.h 
+ *  File: glm_trackball.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,46 +28,29 @@
  *  SOFTWARE.
  */
 
-#ifndef __render_window_h__
-#define __render_window_h__
+#ifndef __glm_trackball_h__
+#define __glm_trackball_h__
 
-#include "WindowQt.h"
-#include "glm_win_event_handler_publisher.h"
+#include "glm_win_event_handler.h"
 
-class glmTrackball;
-class RenderWindow : public WindowQt
+class glmTrackball : public glmWinEventHandler
 {
 public:
-    bool initializeGL() override;
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
-    void deinitializeGL() override;
-    void resizeGL(QResizeEvent* event) override;
-    void paintGL() override;    
-    void keyPressEvent(QKeyEvent* event) override;    
-    glmWinEventHandlerPublisher* handlerRegister(){ return handler_register_.get(); }
-    RenderWindow(QApplication& app, QSurfaceFormat& format);
-    virtual ~RenderWindow();
+    void handleEvent(const glmWinEvent& event) override;
+    glmTrackball();
+    ~glmTrackball();
 
-protected:
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseReleaseEvent(QMouseEvent*) override;
-    void mouseMoveEvent(QMouseEvent*) override;
-    glmMeshPtr cur_mesh_cloud_;
-    glmBufferPtr buffer_;
-    glmVertexArrayPtr vao_;
-    glmShaderProgramPtr program_;
-    glm::mat4 model_;
-    glm::mat4 view_;
-    glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 1.0f);
-    glm::vec3 focal_point_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 viewup_ = glm::vec3(0.0f, 1.0f, 0.0f);
-    float win_aspect_ = 1.0f;
-    float near_plane_dist_ = 0.0f;
-    float far_plane_dist_ = 2.0f;
-    float fovy_ = glm::radians(45.0f);
-    glm::mat4 projection_;
-    std::unique_ptr<glmWinEventHandlerPublisher> handler_register_;
-    std::unique_ptr<glmTrackball> trackball_;
+private:
+    void handleLeftButtonPressed(const glmWinEvent& event);
+    void handleLeftButtonReleased(const glmWinEvent& event);
+    void handleRightButtonPressed(const glmWinEvent& event);
+    void handleRightButtonReleased(const glmWinEvent& event);
+    void handleMiddleButtoPressed(const glmWinEvent& event);
+    void handleMiddleButtoReleased(const glmWinEvent& event);
+    void handleMouseMove(const glmWinEvent& event);
+    void handleMouseEvent(const glmWinEvent& event);
+    void handleKeyboardEvent(const glmWinEvent& event);
+    bool left_button_pressed_ = false;
 };
 
 #endif
