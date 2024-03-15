@@ -68,6 +68,7 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
     target_event.type = glmWinEvent::ET_RELEASE;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
+    target_event.extra_data = this;
     handler_register_->publish(target_event);
 }
 
@@ -81,10 +82,20 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
     target_event.type = glmWinEvent::ET_MOVE;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
+    target_event.extra_data = this;
     handler_register_->publish(target_event);
 }
 
-void RenderWindow::mousePressEvent(QMouseEvent* event)
+void RenderWindow::applyModelRotate(const glm::quat& rotation)
+{
+    makeCurrent();
+    model_ = model_ * glm::toMat4(rotation);
+    program_->setUniformMatrix4fv("model", model_);
+    updateGL();
+    doneCurrent();
+}
+
+void RenderWindow::mousePressEvent(QMouseEvent *event)
 {
     WindowQt::mousePressEvent(event);
     spdlog::debug("mousePressEvent:{}", (int)event->button());
@@ -94,6 +105,7 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
     target_event.type = glmWinEvent::ET_PRESSE;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
+    target_event.extra_data = this;
     handler_register_->publish(target_event);
 }
 
@@ -176,6 +188,7 @@ void RenderWindow::resizeGL(QResizeEvent * event)
     makeCurrent();
     const auto& new_size = event->size();
     glViewport(0, 0, new_size.width(), new_size.height());
+    trackball_->setWindowSize(new_size.width(), new_size.height());
     win_aspect_ = (float)new_size.width() / (float)new_size.height();
     spdlog::trace("new_w:{} new_h:{} cur_w:{} cur_h:{}", new_size.width(), new_size.height(), width(), height());
     projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);

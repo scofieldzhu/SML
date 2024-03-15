@@ -32,15 +32,19 @@
 #define __glm_trackball_h__
 
 #include "glm_win_event_handler.h"
+#include <glm/gtx/quaternion.hpp>
 
 class glmTrackball : public glmWinEventHandler
 {
 public:
+    void setWindowSize(uint32_t w, uint32_t h);
     void handleEvent(const glmWinEvent& event) override;
     glmTrackball();
     ~glmTrackball();
 
 private:
+    glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
+    glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
     void handleLeftButtonPressed(const glmWinEvent& event);
     void handleLeftButtonReleased(const glmWinEvent& event);
     void handleRightButtonPressed(const glmWinEvent& event);
@@ -51,6 +55,9 @@ private:
     void handleMouseEvent(const glmWinEvent& event);
     void handleKeyboardEvent(const glmWinEvent& event);
     bool left_button_pressed_ = false;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
+    glm::vec2 last_mouse_pos_;
 };
 
 #endif

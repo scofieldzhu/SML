@@ -73,6 +73,7 @@ struct glmWinEvent
     ScrollDirection scroll_direction = SD_NULL;
     float scroll_angle = 0.0f;
     glm::vec2 pos{0.0f, 0.0f};
+    void* extra_data = nullptr;
 };
 
 #endif

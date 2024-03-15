@@ -30,6 +30,7 @@
 
 #include "glm_trackball.h"
 #include <spdlog/spdlog.h>
+#include "render_window.h"
 
 glmTrackball::glmTrackball()
 {
@@ -39,9 +40,35 @@ glmTrackball::~glmTrackball()
 {
 }
 
+glm::quat glmTrackball::rotate(const glm::vec2& start_pos, const glm::vec2& end_pos) const
+{
+    if(start_pos == end_pos){
+        return glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    }
+    glm::vec3 start = mapToSphere(start_pos);
+    glm::vec3 end = mapToSphere(end_pos);
+    glm::vec3 axis = glm::cross(start, end);
+    float angle = std::acos(std::min(1.0f, glm::dot(start, end)));
+    return glm::angleAxis(angle, glm::normalize(axis));
+}
+
+glm::vec3 glmTrackball::mapToSphere(const glm::vec2& win_pos) const
+{
+    float x = (2.0 * win_pos.x - (float)width_) / (float)width_;
+    float y = (height_ - 2.0 * win_pos.y) / (float)height_;
+    float len_squared = x * x + y * y;
+    if(len_squared <= 1.0f){ //lies inside of sphere 
+        return glm::vec3(x, y, sqrt(1.0 - len_squared));
+    }else{
+        float length = std::sqrt(len_squared);
+        return glm::vec3(x / length, y / length, 0.0f);
+    }
+}
+
 void glmTrackball::handleLeftButtonPressed(const glmWinEvent& event)
 {
     left_button_pressed_ = true;
+    last_mouse_pos_ = event.pos;
     spdlog::debug("handleLeftButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
@@ -53,6 +80,13 @@ void glmTrackball::handleMiddleButtoReleased(const glmWinEvent& event)
 void glmTrackball::handleMouseMove(const glmWinEvent& event)
 {
     spdlog::debug("handleMouseMove! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    if(left_button_pressed_){
+        auto render_win = static_cast<RenderWindow*>(event.extra_data);
+        glm::vec2 now_pos = event.pos;
+        auto quad = rotate(last_mouse_pos_, now_pos);
+        render_win->applyModelRotate(quad);
+        last_mouse_pos_ = now_pos;
+    }
 }
 
 void glmTrackball::handleMiddleButtoPressed(const glmWinEvent& event)
@@ -112,7 +146,13 @@ void glmTrackball::handleKeyboardEvent(const glmWinEvent &event)
 {
 }
 
-void glmTrackball::handleEvent(const glmWinEvent& event)
+void glmTrackball::setWindowSize(uint32_t w, uint32_t h)
+{
+    width_ = w;
+    height_ = h;
+}
+
+void glmTrackball::handleEvent(const glmWinEvent &event)
 {
     if(event.source == glmWinEvent::ES_MOUSE_DEVICE){
         handleMouseEvent(event);

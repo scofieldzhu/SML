@@ -49,6 +49,8 @@ public:
     virtual ~RenderWindow();
 
 protected:
+    friend class glmTrackball;
+    void applyModelRotate(const glm::quat& rotation);
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
     void mouseMoveEvent(QMouseEvent*) override;
