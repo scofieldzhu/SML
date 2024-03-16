@@ -38,14 +38,14 @@
 #include "ply_reader.h"
 #include "glm_mesh.h"
 
-std::unique_ptr<RenderWindow> gRenderWindow;
+RenderWindow* stRenderWindow = nullptr;
 
 void LoadMeshData()
 {
     QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
     glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
     ply_reader::LoadFile(data_file, mesh_cloud->vertex_list);
-    gRenderWindow->loadMeshCloud(mesh_cloud);
+    stRenderWindow->loadMeshCloud(mesh_cloud);
 }
 
 int main(int argc, char * argv[])
@@ -66,12 +66,11 @@ int main(int argc, char * argv[])
 #endif
     format.setDepthBufferSize(16);
 
-    gRenderWindow = std::make_unique<RenderWindow>(app, format);
-
     QMainWindow window;
     window.setMinimumSize(640, 480);
     window.setWindowTitle("globjects and Qt");
-    window.setCentralWidget(QWidget::createWindowContainer(gRenderWindow.get()));
+    stRenderWindow = new RenderWindow(app, format);
+    window.setCentralWidget(QWidget::createWindowContainer(stRenderWindow, &window));
 
     QTimer::singleShot(2000, LoadMeshData);
 
