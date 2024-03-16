@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: cloud_mesh.h 
+ *  File: glm_win_event_handler.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,18 +28,18 @@
  *  SOFTWARE.
  */
 
-#ifndef __cloud_mesh_h__
-#define __cloud_mesh_h__
+#ifndef __glm_win_event_handler_h__
+#define __glm_win_event_handler_h__
 
-#include "base_types.h"
+#include "glmesh/core/glm_win_event.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-struct CloudMesh
+class glmWinEventHandler
 {
-    bool isNull()const{ return vertex_list.empty(); }
-    bool isNonNull()const{ return !isNull(); }
-    VertexList vertex_list;
+public:
+    virtual void handleEvent(const glmWinEvent& event) = 0;
+    virtual ~glmWinEventHandler() = default;
 };
 
 GLMESH_NAMESPACE_END

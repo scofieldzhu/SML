@@ -32,16 +32,21 @@
 #define __glm_vertex_array_h__
 
 #include <map>
-#include "glm_vertex_array_attrib.h"
+#include "glmesh/core/glm_vertex_array_attrib.h"
+#include "glmesh/core/glm_export.h"
 
-class glmVertexArray 
+GLMESH_NAMESPACE_BEGIN
+
+class GLMESH_API glmVertexArray 
 {
 public:
     void bindCurrent();
     void bindBuffer(uint32_t buffer_id);
     uint32_t id()const{ return id_; }
     glmVertexArrayAttrib* getAttrib(uint32_t index);
+    glmVertexArray& operator=(const glmVertexArray&) = delete;
     glmVertexArray();
+    glmVertexArray(const glmVertexArray&) = delete;
     ~glmVertexArray();
 
 private:
@@ -49,5 +54,7 @@ private:
     using AttribUPtr = std::unique_ptr<glmVertexArrayAttrib>;
     std::map<uint32_t, AttribUPtr> attrib_map_;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif

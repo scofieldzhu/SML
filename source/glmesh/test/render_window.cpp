@@ -29,13 +29,14 @@
  */
 
 #include "render_window.h"
-#include <iostream>
 #include <QDir>
 #include <QResizeEvent>
 #include <QApplication>
 #include <spdlog/spdlog.h>
-#include "glm_trackball.h"
-#include "glm_mesh_renderer.h"
+#include "glmesh/core/glm_trackball.h"
+#include "glmesh/core/glm_mesh_renderer.h"
+
+using namespace glmesh;
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format),

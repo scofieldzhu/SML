@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_win_event.h 
+ *  File: glm_win_event_handler_publisher.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,47 +28,48 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_win_event_h__
-#define __glm_win_event_h__
+#include "glm_win_event_handler_publisher.h"
+#include <algorithm>
+#include "glm_win_event_handler.h"
 
-#include "base_type_def.h"
+GLMESH_NAMESPACE_BEGIN
 
-struct glmWinEvent
+glmWinEventHandlerPublisher::glmWinEventHandlerPublisher()
 {
-    enum EventSource
-    {
-        ES_NULL,
-        ES_MOUSE_DEVICE,
-        ES_KEYBOARD,
-        ES_WIN
-    };
-    
-    enum MouseButton
-    {
-        MB_NULL,
-        MB_LEFT,
-        MB_RIGHT,
-        MB_MIDDLE
-    };
-    
-    enum EventType
-    {
-        ET_NULL,
-        ET_PRESSE,
-        ET_DOUBLE_PRESS,
-        ET_RELEASE,
-        ET_MOVE,
-        ET_WHEEL_SCROLL,
-        ET_RESIZE
-    };
-    
-    EventSource source = ES_NULL;
-    EventType type = ET_NULL;
-    int event_button_id = -1;
-    float scroll_delta = 0.0f;
-    glm::vec2 pos{0.0f, 0.0f};
-    glm::vec2 win_size{0.0f, 0.0f};
-    void* extra_data = nullptr;
-};
+}
 
-#endif
+glmWinEventHandlerPublisher::~glmWinEventHandlerPublisher()
+{
+}
+
+void glmWinEventHandlerPublisher::publish(const glmWinEvent& event)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    for(auto h : handlers_){
+        h->handleEvent(event);
+    }
+}
+
+void glmWinEventHandlerPublisher::addHandler(glmWinEventHandler *e)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    if(e){
+        handlers_.push_back(e);
+    }
+}
+
+void glmWinEventHandlerPublisher::removeHandler(glmWinEventHandler* e)
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    if(e){
+        handlers_.erase(std::remove(handlers_.begin(), handlers_.end(), e));
+    }
+}
+
+void glmWinEventHandlerPublisher::clear()
+{
+    std::lock_guard<std::mutex> auto_lock(lock_);
+    handlers_.clear();
+}
+
+GLMESH_NAMESPACE_END

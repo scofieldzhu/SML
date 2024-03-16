@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glmesh_nsp.h 
+ *  File: glm_mesh.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,10 +28,33 @@
  *  SOFTWARE.
  */
 
-#ifndef __glmesh_nsp_h__
-#define __glmesh_nsp_h__
+#include "glm_mesh.h"
 
-#define GLMESH_NAMESPACE_BEGIN namespace glmesh{
-#define GLMESH_NAMESPACE_END }
+GLMESH_NAMESPACE_BEGIN
 
-#endif
+glmBoundingBox glmMesh::calcBoundingBox() const
+{
+    glmBoundingBox box;
+    for(const auto& v : vertex_list) {
+        box.min.x = std::min(box.min.x, v.x);
+        box.min.y = std::min(box.min.y, v.y);
+        box.min.z = std::min(box.min.z, v.z);
+        box.max.x = std::max(box.max.x, v.x);
+        box.max.y = std::max(box.max.y, v.y);
+        box.max.z = std::max(box.max.z, v.z);
+    }
+    return box;
+}
+
+glm::vec3 glmMesh::calcCenterPoint() const
+{
+    glm::vec3 center(0.0f, 0.0f, 0.0f);
+    for(const auto& v : vertex_list){
+        center[0] += v[0];
+        center[1] += v[1];
+        center[2] += v[2];
+    }
+    return  center * (1.0f / vertex_list.size());
+}
+
+GLMESH_NAMESPACE_END

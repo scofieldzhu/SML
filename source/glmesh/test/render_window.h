@@ -32,19 +32,18 @@
 #define __render_window_h__
 
 #include "WindowQt.h"
-#include "glm_win_event_handler_publisher.h"
+#include "glmesh/core/glm_win_event_handler_publisher.h"
 
-class glmTrackball;
 class RenderWindow : public WindowQt
 {
 public:
     bool initializeGL() override;
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
+    void loadMeshCloud(glmesh::glmMeshPtr mesh_cloud);
     void deinitializeGL() override;
     void resizeGL(QResizeEvent* event) override;
     void paintGL() override;    
     void keyPressEvent(QKeyEvent* event) override;    
-    glmWinEventHandlerPublisher* handlerRegister(){ return handler_register_.get(); }
+    glmesh::glmWinEventHandlerPublisher* handlerRegister(){ return handler_register_.get(); }
     RenderWindow(QApplication& app, QSurfaceFormat& format);
     virtual ~RenderWindow();
 
@@ -53,9 +52,9 @@ protected:
     void mouseReleaseEvent(QMouseEvent*) override;
     void mouseMoveEvent(QMouseEvent*) override;
     void wheelEvent(QWheelEvent*) override;
-    glmMeshRendererPtr renderer_;
-    std::unique_ptr<glmWinEventHandlerPublisher> handler_register_;
-    std::unique_ptr<glmTrackball> trackball_;
+    glmesh::glmMeshRendererPtr renderer_;
+    std::unique_ptr<glmesh::glmWinEventHandlerPublisher> handler_register_;
+    std::unique_ptr<glmesh::glmTrackball> trackball_;
 };
 
 #endif

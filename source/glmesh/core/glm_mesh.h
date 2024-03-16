@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_vertex_array_attrib.cpp 
+ *  File: glm_mesh.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,29 +28,23 @@
  *  SOFTWARE.
  */
 
-#include "glm_vertex_array_attrib.h"
-#include "glad/glad.h"
+#ifndef __glm_mesh_h__
+#define __glm_mesh_h__
 
-glmVertexArrayAttrib::glmVertexArrayAttrib(uint32_t index)
-    :index_(index)
-{
-}
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
-glmVertexArrayAttrib::~glmVertexArrayAttrib()
-{
-}
+GLMESH_NAMESPACE_BEGIN
 
-void glmVertexArrayAttrib::enable()
+struct GLMESH_API glmMesh
 {
-    glEnableVertexAttribArray(index_);
-}
+    bool isNull()const{ return vertex_list.empty(); }
+    bool isNonNull()const{ return !isNull(); }
+    glmBoundingBox calcBoundingBox()const;
+    glm::vec3 calcCenterPoint()const;
+    VertexList vertex_list;
+};
 
-void glmVertexArrayAttrib::disable()
-{
-    glDisableVertexAttribArray(index_);
-}
+GLMESH_NAMESPACE_END
 
-void glmVertexArrayAttrib::setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void *pointer)
-{
-    glVertexAttribPointer(index_, size, type, normalized, stride, pointer);
-}
+#endif

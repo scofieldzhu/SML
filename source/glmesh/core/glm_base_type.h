@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_mesh.cpp 
+ *  File: glm_base_type.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,29 +28,52 @@
  *  SOFTWARE.
  */
 
-#include "glm_mesh.h"
+#ifndef __glm_base_type_h__
+#define __glm_base_type_h__
 
-glmBoundingBox glmMesh::calcBoundingBox() const
-{
-    glmBoundingBox box;
-    for(const auto& v : vertex_list) {
-        box.min.x = std::min(box.min.x, v.x);
-        box.min.y = std::min(box.min.y, v.y);
-        box.min.z = std::min(box.min.z, v.z);
-        box.max.x = std::max(box.max.x, v.x);
-        box.max.y = std::max(box.max.y, v.y);
-        box.max.z = std::max(box.max.z, v.z);
-    }
-    return box;
-}
+#include <vector>
+#include <memory>
+#include <cstdint>
+#include <numeric>
+#include <glm/glm.hpp>
+#include "glmesh/core/glm_nsp.h"
 
-glm::vec3 glmMesh::calcCenterPoint() const
+GLMESH_NAMESPACE_BEGIN
+
+using VertexList = std::vector<glm::vec3>;
+
+constexpr uint32_t kVertexSize = sizeof(glm::vec3);
+
+struct glmMesh;
+using glmMeshPtr = std::shared_ptr<glmMesh>;
+
+class glmBuffer;
+using glmBufferPtr = std::shared_ptr<glmBuffer>;
+
+class glmVertexArray;
+using glmVertexArrayPtr = std::shared_ptr<glmVertexArray>;
+
+class glmVertexArrayAttrib;
+class glmShaderProgram;
+using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
+
+class glmMeshRenderer;
+using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
+
+class glmWinEventHandler;
+
+class glmTrackball;
+
+struct glmBoundingBox
 {
-    glm::vec3 center(0.0f, 0.0f, 0.0f);
-    for(const auto& v : vertex_list){
-        center[0] += v[0];
-        center[1] += v[1];
-        center[2] += v[2];
-    }
-    return  center * (1.0f / vertex_list.size());
-}
+    glm::vec3 calcCenter()const{ return {(min[0] + max[0]) / 2.0, (min[1] + max[1]) / 2.0, (min[2] + max[2]) / 2.0}; }
+    float calcDiagonalLength()const{ return glm::distance(min, max); }
+    glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
+    glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
+};
+
+GLMESH_NAMESPACE_END
+
+#define BUFFER_OFFSET(a) ((void*)(a))
+
+#endif

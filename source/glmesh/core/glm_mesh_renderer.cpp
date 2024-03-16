@@ -38,6 +38,9 @@
 #include "glm_vertex_array.h"
 #include "glm_vertex_array_attrib.h"
 #include "glm_shader_program.h"
+#include "glm_shader_source.h"
+
+GLMESH_NAMESPACE_BEGIN
 
 glmMeshRenderer::glmMeshRenderer()
 {
@@ -65,25 +68,18 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     eye_ = {0.0f, 0.0f, diagonal_len};
     view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
-    far_plane_dist_ = 1.6 * diagonal_len;
+    far_plane_dist_ = 1.6f * diagonal_len;
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = std::make_shared<glmBuffer>();
-    const GLuint kTotalSize = kVertexSize * mesh_cloud->vertex_list.size();
+    const uint32_t kTotalSize = kVertexSize * static_cast<uint32_t>(mesh_cloud->vertex_list.size());
     buffer_->allocate(kTotalSize, mesh_cloud->vertex_list.data(), 0);
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(buffer_->id());
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     vao_->getAttrib(0)->enable();
-
-    // glm::mat4 final_mat = projection_ * view_ * model_;
-    // glm::vec4 transformed_point = final_mat * glm::vec4(center_point, 1.0);
-    // spdlog::info("focal_point:[{},{}, {}] transformed point:[{},{}, {}]", 
-    //     center_point[0], center_point[1], center_point[2], 
-    //     transformed_point[0]/transformed_point[3], transformed_point[1]/transformed_point[3], transformed_point[2]/transformed_point[3]
-    // );
 }
 
 bool glmMeshRenderer::initialize(float width, float height)
@@ -97,9 +93,9 @@ bool glmMeshRenderer::initialize(float width, float height)
         return false;
     }
     program_ = std::make_shared<glmShaderProgram>();
-    if(!program_->addShaderFile("shader.vert", GL_VERTEX_SHADER))
+    if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
         return false;
-    if(!program_->addShaderFile("shader.frag", GL_FRAGMENT_SHADER))
+    if(!program_->addShaderFile(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
         return false;
     if(!program_->link())
         return false;
@@ -142,7 +138,7 @@ void glmMeshRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     if(vao_){
         vao_->bindCurrent();
-        glDrawArrays(GL_POINTS, 0, cur_mesh_cloud_->vertex_list.size());
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_list.size()));
     }
     spdlog::info("Render called!");
 }
@@ -158,3 +154,5 @@ void glmMeshRenderer::resize(float width, float height)
     program_->setUniformMatrix4fv("projection", projection_);
     render();
 }
+
+GLMESH_NAMESPACE_END

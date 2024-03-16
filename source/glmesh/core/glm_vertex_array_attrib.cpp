@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: mesh_renderer.cpp 
+ *  File: glm_vertex_array_attrib.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,27 +28,33 @@
  *  SOFTWARE.
  */
 
-#include "mesh_renderer.h"
+#include "glm_vertex_array_attrib.h"
+#include "glad/glad.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-MeshRenderer::MeshRenderer()
+glmVertexArrayAttrib::glmVertexArrayAttrib(uint32_t index)
+    :index_(index)
 {
 }
 
-MeshRenderer::~MeshRenderer()
+glmVertexArrayAttrib::~glmVertexArrayAttrib()
 {
 }
 
-void MeshRenderer::initialize()
+void glmVertexArrayAttrib::enable()
 {
-    initializeOpenGLFunctions();
+    glEnableVertexAttribArray(index_);
 }
 
-void MeshRenderer::render(uint32_t width, uint32_t height)
+void glmVertexArrayAttrib::disable()
 {
-    glViewport(0, 0, width, height);
-    //glClear()
+    glDisableVertexAttribArray(index_);
+}
+
+void glmVertexArrayAttrib::setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void *pointer)
+{
+    glVertexAttribPointer(index_, size, type, normalized, static_cast<GLsizei>(stride), pointer);
 }
 
 GLMESH_NAMESPACE_END

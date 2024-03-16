@@ -31,10 +31,13 @@
 #ifndef __glm_mesh_renderer_h__
 #define __glm_mesh_renderer_h__
 
-#include "base_type_def.h"
 #include <glm/gtx/quaternion.hpp>
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
-class glmMeshRenderer
+GLMESH_NAMESPACE_BEGIN
+
+class GLMESH_API glmMeshRenderer
 {
 public:
     void loadMeshCloud(glmMeshPtr mesh_cloud);
@@ -68,5 +71,7 @@ private:
     glm::mat4 projection_;
     bool initialized_ = false;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif

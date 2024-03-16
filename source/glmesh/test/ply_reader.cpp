@@ -36,6 +36,7 @@
 #include <pcl/point_cloud.h> 
 #include <spdlog/spdlog.h>
 using namespace pcl;
+using namespace glmesh;
 
 bool ply_reader::LoadFile(const QString& filename, VertexList& vertices)
 {

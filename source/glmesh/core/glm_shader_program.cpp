@@ -29,41 +29,12 @@
  */
 
 #include "glm_shader_program.h"
-/* 
- *  glmesh is a mesh data render library base on QOpengl.
- *  glmesh provides object-oriented interfaces to the OpenGL API (3.0 and higher). 
- *  It reduces the amount of OpenGL code required for rendering and facilitates 
- *  coherent OpenGL.
- *  
- *  File: glm_shader_program.cpp 
- *  Copyright (c) 2024-2024 scofieldzhu
- *  
- *  MIT License
- *  
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *  
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *  
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
-
-#include "glm_shader_program.h"
 #include "glad/glad.h"
 #include <spdlog/spdlog.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
+
+GLMESH_NAMESPACE_BEGIN
 
 namespace{
     std::string ReadShaderFile(const char* filename)
@@ -101,20 +72,15 @@ void glmShaderProgram::releaseShaders()
     shaders_.clear();
 }
 
-uint32_t glmShaderProgram::addShaderFile(const char* filename, uint32_t shader_type)
+uint32_t glmShaderProgram::addShaderSource(const char* source, uint32_t shader_type)
 {
-    if(shader_type == GL_NONE || filename == nullptr){
-        spdlog::error("Null value of parameter 'filename' or 'shader_type'!");
+    if(source == nullptr || shader_type == GL_NONE){
+        spdlog::error("Null value of parameter 'source' or 'shader_type'!");
         return 0;
     }
     GLuint shader_id = glCreateShader(shader_type);
-    auto source = ReadShaderFile(filename);
-    if(source.empty()){
-        spdlog::error("Unable to read content from file:{}", std::string(filename));
-        return 0;
-    }
-    const GLchar* source_data = source.data();
-    const GLint length = (int)source.size();
+    const GLchar* source_data = source;
+    const GLint length = (int)strlen(source);
     glShaderSource(shader_id, 1, &source_data, &length);
     glCompileShader(shader_id);
     GLint compiled;
@@ -130,6 +96,20 @@ uint32_t glmShaderProgram::addShaderFile(const char* filename, uint32_t shader_t
     glAttachShader(id_, shader_id);
     shaders_.push_back(shader_id);
     return shader_id;
+}
+
+uint32_t glmShaderProgram::addShaderFile(const char* filename, uint32_t shader_type)
+{
+    if(shader_type == GL_NONE || filename == nullptr){
+        spdlog::error("Null value of parameter 'filename' or 'shader_type'!");
+        return 0;
+    }
+    auto source = ReadShaderFile(filename);
+    if(source.empty()){
+        spdlog::error("Unable to read content from file:{}", std::string(filename));
+        return 0;
+    }
+    return addShaderSource(source.c_str(), shader_type);
 }
 
 bool glmShaderProgram::link()
@@ -167,3 +147,5 @@ void glmShaderProgram::setUniformMatrix4fv(const char *name, const glm::mat4 &ma
 {
     setUniformMatrix4fv(glGetUniformLocation(id_, name), mat);
 }
+
+GLMESH_NAMESPACE_END

@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: mesh_renderer.h 
+ *  File: glm_vertex_array_attrib.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,22 +28,26 @@
  *  SOFTWARE.
  */
 
-#ifndef __mesh_renderer_h__
-#define __mesh_renderer_h__
+#ifndef __glm_vertex_array_attrib_h__
+#define __glm_vertex_array_attrib_h__
 
-#include <QOpenglFunctions>
-#include "glmesh/core/base_types.h"
-#include "glmesh/core/glmesh_export.h"
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API MeshRenderer : public QOpenGLFunctions
+class GLMESH_API glmVertexArrayAttrib
 {
-public: 
-    void initialize();
-    void render(uint32_t width, uint32_t height);
-    MeshRenderer();
-    ~MeshRenderer();
+public:
+    void enable();
+    void disable();
+    void setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void* pointer);
+    uint32_t index()const;
+    glmVertexArrayAttrib(uint32_t index);
+    ~glmVertexArrayAttrib();
+
+private:
+    uint32_t index_;
 };
 
 GLMESH_NAMESPACE_END

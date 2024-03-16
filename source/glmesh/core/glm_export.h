@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glmesh_export.h 
+ *  File: glm_export.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,10 +28,10 @@
  *  SOFTWARE.
  */
 
-#ifndef __glmesh_export_h__
-#define __glmesh_export_h__
+#ifndef __glm_export_h__
+#define __glm_export_h__
 
-#include "glmesh_nsp.h"
+#include "glmesh/core/glm_nsp.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS) || defined(_WINDLL)
     #ifdef GLMESH_EXPORT

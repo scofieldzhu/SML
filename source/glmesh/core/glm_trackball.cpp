@@ -32,6 +32,8 @@
 #include <spdlog/spdlog.h>
 #include "glm_mesh_renderer.h"
 
+GLMESH_NAMESPACE_BEGIN
+
 glmTrackball::glmTrackball(glmMeshRendererPtr ren)
     :renderer_(ren)
 {
@@ -190,3 +192,5 @@ void glmTrackball::handleEvent(const glmWinEvent& event)
     }
     spdlog::warn("Invalid event source:{} identified!", (int)event.source);
 }
+
+GLMESH_NAMESPACE_END

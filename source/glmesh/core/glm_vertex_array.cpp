@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_shader_program.h 
+ *  File: glm_vertex_array.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,28 +28,40 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_shader_program_h__
-#define __glm_shader_program_h__
+#include "glm_vertex_array.h"
+#include "glad/glad.h"
 
-#include "base_type_def.h"
+GLMESH_NAMESPACE_BEGIN
 
-class glmShaderProgram
+glmVertexArray::glmVertexArray()
 {
-public:
-    uint32_t addShaderFile(const char* filename, uint32_t shader_type);  
-    bool link();   
-    void use();
-    int32_t getUniformLocation(const char* name)const;
-    void setUniformMatrix4fv(int32_t location, const glm::mat4& mat)const;
-    void setUniformMatrix4fv(const char* name, const glm::mat4& mat)const;
-    uint32_t id()const{ return id_; }
-    glmShaderProgram();
-    ~glmShaderProgram();
+    glGenVertexArrays(1, &id_);
+}
 
-private:    
-    void releaseShaders();
-    uint32_t id_ = 0;
-    std::vector<uint32_t> shaders_;
-};
+glmVertexArray::~glmVertexArray()
+{
+}
 
-#endif
+void glmVertexArray::bindCurrent()
+{
+    glBindVertexArray(id_);
+}
+
+void glmVertexArray::bindBuffer(uint32_t buffer_id)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+}
+
+glmVertexArrayAttrib* glmVertexArray::getAttrib(uint32_t index)
+{
+    auto it = attrib_map_.find(index);
+    if(it != attrib_map_.end()){
+        return (*it).second.get();
+    }
+    auto attrib = std::make_unique<glmVertexArrayAttrib>(index);
+    auto attrib_pointer = attrib.get();
+    attrib_map_.insert({index, std::move(attrib)});
+    return attrib_pointer;
+}
+
+GLMESH_NAMESPACE_END

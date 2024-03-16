@@ -1,0 +1,6 @@
+#pragma once
+
+namespace ShaderSource {
+    const char* kVertexShaderSource = R"(@VERTEX_SHADER_SOURCE@)";
+    const char* kFragmentShaderSource = R"(@FRAGMENT_SHADER_SOURCE@)";
+}

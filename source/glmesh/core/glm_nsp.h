@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: base_types.h 
+ *  File: glm_nsp.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,19 +28,10 @@
  *  SOFTWARE.
  */
 
-#ifndef __base_types_h__
-#define __base_types_h__
+#ifndef __glm_nsp_h__
+#define __glm_nsp_h__
 
-#include <vector>
-#include <glm/glm.hpp>
-#include "glmesh_nsp.h"
-
-GLMESH_NAMESPACE_BEGIN
-
-using VertexType = glm::vec3;
-using VertexList = std::vector<VertexType>;
-
-
-GLMESH_NAMESPACE_END
+#define GLMESH_NAMESPACE_BEGIN namespace glmesh{
+#define GLMESH_NAMESPACE_END }
 
 #endif

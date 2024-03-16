@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_mesh.h 
+ *  File: glm_win_event_handler_publisher.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,18 +28,31 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_mesh_h__
-#define __glm_mesh_h__
+#ifndef __glm_win_event_handler_publisher_h__
+#define __glm_win_event_handler_publisher_h__
 
-#include "base_type_def.h"
+#include <vector>
+#include <mutex>
+#include "glmesh/core/glm_win_event.h"
+#include "glmesh/core/glm_export.h"
 
-struct glmMesh
+GLMESH_NAMESPACE_BEGIN
+ 
+class GLMESH_API glmWinEventHandlerPublisher final
 {
-    bool isNull()const{ return vertex_list.empty(); }
-    bool isNonNull()const{ return !isNull(); }
-    glmBoundingBox calcBoundingBox()const;
-    glm::vec3 calcCenterPoint()const;
-    VertexList vertex_list;
+public:
+    void publish(const glmWinEvent& event);
+    void addHandler(glmWinEventHandler* e);
+    void removeHandler(glmWinEventHandler* e);
+    void clear();
+    glmWinEventHandlerPublisher();
+    ~glmWinEventHandlerPublisher();
+
+private:
+    std::vector<glmWinEventHandler*> handlers_;
+    std::mutex lock_;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif

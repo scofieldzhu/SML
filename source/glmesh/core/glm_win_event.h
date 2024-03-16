@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_trackball.h 
+ *  File: glm_win_event.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,39 +28,51 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_trackball_h__
-#define __glm_trackball_h__
+#ifndef __glm_win_event_h__
+#define __glm_win_event_h__
 
-#include "glm_win_event_handler.h"
-#include <glm/gtx/quaternion.hpp>
+#include "glmesh/core/glm_base_type.h"
 
-class glmTrackball : public glmWinEventHandler
+GLMESH_NAMESPACE_BEGIN
+
+struct glmWinEvent
 {
-public:
-    void handleEvent(const glmWinEvent& event) override;
-    glmTrackball(glmMeshRendererPtr ren);
-    ~glmTrackball();
-
-private:
-    glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
-    glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
-    void handleLeftButtonPressed(const glmWinEvent& event);
-    void handleLeftButtonReleased(const glmWinEvent& event);
-    void handleRightButtonPressed(const glmWinEvent& event);
-    void handleRightButtonReleased(const glmWinEvent& event);
-    void handleMiddleButtoPressed(const glmWinEvent& event);
-    void handleMiddleButtoReleased(const glmWinEvent& event);
-    void handleMouseMove(const glmWinEvent& event);
-    void handleMouseEvent(const glmWinEvent& event);
-    void handleKeyboardEvent(const glmWinEvent& event);
-    void handleWheelScroll(const glmWinEvent& event);
-    void handleWindowEvent(const glmWinEvent& event);
-    void handleResize(const glmWinEvent& event);
-    bool left_button_pressed_ = false;
-    float width_ = 0.0f;
-    float height_ = 0.0f;
-    glm::vec2 last_mouse_pos_;
-    glmMeshRendererPtr renderer_;
+    enum EventSource
+    {
+        ES_NULL,
+        ES_MOUSE_DEVICE,
+        ES_KEYBOARD,
+        ES_WIN
+    };
+    
+    enum MouseButton
+    {
+        MB_NULL,
+        MB_LEFT,
+        MB_RIGHT,
+        MB_MIDDLE
+    };
+    
+    enum EventType
+    {
+        ET_NULL,
+        ET_PRESSE,
+        ET_DOUBLE_PRESS,
+        ET_RELEASE,
+        ET_MOVE,
+        ET_WHEEL_SCROLL,
+        ET_RESIZE
+    };
+    
+    EventSource source = ES_NULL;
+    EventType type = ET_NULL;
+    int event_button_id = -1;
+    float scroll_delta = 0.0f;
+    glm::vec2 pos{0.0f, 0.0f};
+    glm::vec2 win_size{0.0f, 0.0f};
+    void* extra_data = nullptr;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif

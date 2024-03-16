@@ -1,7 +1,3 @@
-
-find_package(globjects)
-find_package(glbinding REQUIRED)
-#find_package(cpplocate REQUIRED)
 find_package(Qt5Core    5.1)
 find_package(Qt5Gui     5.1)
 find_package(Qt5Widgets 5.1)
@@ -17,7 +13,7 @@ set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 cmake_policy(SET CMP0020 NEW)
 
 # # Target name
-set(target test)
+set(target glmesh.test)
 
 # # Exit here if required dependencies are not met
 if (NOT Qt5Core_FOUND)
@@ -26,7 +22,6 @@ if (NOT Qt5Core_FOUND)
 else()
     message(STATUS "${target}")
 endif()
-
 
 file(GLOB SOURCE_FILES 
     "*.h"
@@ -53,12 +48,11 @@ target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
     ${PCL_LIBRARIES}
-    globjects::globjects
-    # cpplocate::cpplocate
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     spdlog::spdlog
+    glmesh.core
 )
 
 # # 

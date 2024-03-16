@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_vertex_array.cpp 
+ *  File: glm_buffer.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,36 +28,26 @@
  *  SOFTWARE.
  */
 
-#include "glm_vertex_array.h"
-#include "glad/glad.h"
+#ifndef __glm_buffer_h__
+#define __glm_buffer_h__
 
-glmVertexArray::glmVertexArray()
-{
-    glGenVertexArrays(1, &id_);
-}
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
-glmVertexArray::~glmVertexArray()
-{
-}
+GLMESH_NAMESPACE_BEGIN
 
-void glmVertexArray::bindCurrent()
+class GLMESH_API glmBuffer
 {
-    glBindVertexArray(id_);
-}
+public:
+    uint32_t id()const{ return id_; }
+    void allocate(uint32_t size, void* data, uint32_t flags);
+    glmBuffer();
+    ~glmBuffer();
 
-void glmVertexArray::bindBuffer(uint32_t buffer_id)
-{
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
-}
+private:
+    uint32_t id_ = 0;
+};
 
-glmVertexArrayAttrib* glmVertexArray::getAttrib(uint32_t index)
-{
-    auto it = attrib_map_.find(index);
-    if(it != attrib_map_.end()){
-        return (*it).second.get();
-    }
-    auto attrib = std::make_unique<glmVertexArrayAttrib>(index);
-    auto attrib_pointer = attrib.get();
-    attrib_map_.insert({index, std::move(attrib)});
-    return attrib_pointer;
-}
+GLMESH_NAMESPACE_END
+
+#endif

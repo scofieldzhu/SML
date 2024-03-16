@@ -3,18 +3,49 @@ set(PROJECT_NAME "glmesh.core")
 
 project(${PROJECT_NAME})
 
-find_package(Qt5 COMPONENTS Core Widgets Opengl REQUIRED)
 find_package(glm REQUIRED COMPONENTS glm::glm)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(AUTOMOC_MOC_OPTIONS PROPERTIES FOLDER CMakeAutomocTargets)
-set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
+set(EXPORT_HEAD_FILES
+    "glm_nsp.h"
+    "glm_base_type.h"
+    "glm_buffer.h"
+    "glm_export.h"
+    "glm_mesh.h"
+    "glm_mesh_renderer.h"
+    "glm_shader_program.h"
+    "glm_trackball.h"
+    "glm_vertex_array.h"
+    "glm_vertex_array_attrib.h"
+    "glm_win_event.h"
+    "glm_win_event_handler.h"
+    "glm_win_event_handler_publisher.h"
+)
 
-file(GLOB SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+set(SOURCE_FILES
+    "glad/glad.h"
+    "khrplatform.h"
+    "glad.c"
+    "glm_buffer.cpp"
+    "glm_mesh_renderer.cpp"
+    "glm_mesh.cpp"
+    "glm_shader_program.cpp"
+    "glm_trackball.cpp"
+    "glm_vertex_array_attrib.cpp"
+    "glm_vertex_array.cpp"
+    "glm_win_event_handler_publisher.cpp"
+)
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/shader.vert" VERTEX_SHADER_SOURCE)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/shader.frag" FRAGMENT_SHADER_SOURCE)
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/glm_shader_source.h.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glm_shader_source.h"
+)
 
 add_library(${PROJECT_NAME}
     SHARED
+    ${EXPORT_HEAD_FILES}
     ${SOURCE_FILES}
 )
 
@@ -27,19 +58,11 @@ endif()
 target_include_directories(${PROJECT_NAME}
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR} # for UIC generated headers
     ${GLM_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-    ${DEFAULT_LIBRARIES}
-    Qt5::Core
-    Qt5::Widgets
-    globjects::globjects
     spdlog::spdlog
     glm::glm
 )
-
-
-

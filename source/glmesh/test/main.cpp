@@ -36,7 +36,8 @@
 #include <spdlog/spdlog.h>
 #include "render_window.h"
 #include "ply_reader.h"
-#include "glm_mesh.h"
+#include "glmesh/core/glm_mesh.h"
+using namespace glmesh;
 
 RenderWindow* stRenderWindow = nullptr;
 

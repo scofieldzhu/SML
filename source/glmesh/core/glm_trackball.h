@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_win_event_handler_publisher.h 
+ *  File: glm_trackball.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,27 +28,44 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_win_event_handler_publisher_h__
-#define __glm_win_event_handler_publisher_h__
+#ifndef __glm_trackball_h__
+#define __glm_trackball_h__
 
-#include <vector>
-#include <mutex>
-#include "glm_win_event.h"
+#include <glm/gtx/quaternion.hpp>
+#include "glmesh/core/glm_win_event_handler.h"
+#include "glmesh/core/glm_export.h"
 
-class glmWinEventHandler;
-class glmWinEventHandlerPublisher final
+GLMESH_NAMESPACE_BEGIN
+
+class GLMESH_API glmTrackball : public glmWinEventHandler
 {
 public:
-    void publish(const glmWinEvent& event);
-    void addHandler(glmWinEventHandler* e);
-    void removeHandler(glmWinEventHandler* e);
-    void clear();
-    glmWinEventHandlerPublisher();
-    ~glmWinEventHandlerPublisher();
+    void handleEvent(const glmWinEvent& event) override;
+    glmTrackball(glmMeshRendererPtr ren);
+    ~glmTrackball();
 
 private:
-    std::vector<glmWinEventHandler*> handlers_;
-    std::mutex lock_;
+    glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
+    glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
+    void handleLeftButtonPressed(const glmWinEvent& event);
+    void handleLeftButtonReleased(const glmWinEvent& event);
+    void handleRightButtonPressed(const glmWinEvent& event);
+    void handleRightButtonReleased(const glmWinEvent& event);
+    void handleMiddleButtoPressed(const glmWinEvent& event);
+    void handleMiddleButtoReleased(const glmWinEvent& event);
+    void handleMouseMove(const glmWinEvent& event);
+    void handleMouseEvent(const glmWinEvent& event);
+    void handleKeyboardEvent(const glmWinEvent& event);
+    void handleWheelScroll(const glmWinEvent& event);
+    void handleWindowEvent(const glmWinEvent& event);
+    void handleResize(const glmWinEvent& event);
+    bool left_button_pressed_ = false;
+    float width_ = 0.0f;
+    float height_ = 0.0f;
+    glm::vec2 last_mouse_pos_;
+    glmMeshRendererPtr renderer_;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif

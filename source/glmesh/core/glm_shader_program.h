@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_buffer.h 
+ *  File: glm_shader_program.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,21 +28,34 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_buffer_h__
-#define __glm_buffer_h__
+#ifndef __glm_shader_program_h__
+#define __glm_shader_program_h__
 
-#include "base_type_def.h"
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
-class glmBuffer
+GLMESH_NAMESPACE_BEGIN
+
+class GLMESH_API glmShaderProgram
 {
 public:
+    uint32_t addShaderSource(const char* source, uint32_t shader_type);
+    uint32_t addShaderFile(const char* filename, uint32_t shader_type);  
+    bool link();   
+    void use();
+    int32_t getUniformLocation(const char* name)const;
+    void setUniformMatrix4fv(int32_t location, const glm::mat4& mat)const;
+    void setUniformMatrix4fv(const char* name, const glm::mat4& mat)const;
     uint32_t id()const{ return id_; }
-    void allocate(uint32_t size, void* data, uint32_t flags);
-    glmBuffer();
-    ~glmBuffer();
+    glmShaderProgram();
+    ~glmShaderProgram();
 
-private:
+private:    
+    void releaseShaders();
     uint32_t id_ = 0;
+    std::vector<uint32_t> shaders_;
 };
+
+GLMESH_NAMESPACE_END
 
 #endif
