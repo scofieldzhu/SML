@@ -54,6 +54,7 @@ private:
     void handleMouseMove(const glmWinEvent& event);
     void handleMouseEvent(const glmWinEvent& event);
     void handleKeyboardEvent(const glmWinEvent& event);
+    void handleWheelScroll(const glmWinEvent& event);
     bool left_button_pressed_ = false;
     uint32_t width_ = 0;
     uint32_t height_ = 0;

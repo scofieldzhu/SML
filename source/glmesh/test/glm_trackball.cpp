@@ -125,6 +125,10 @@ void glmTrackball::handleMouseEvent(const glmWinEvent& event)
             break;
 
         case glmWinEvent::MB_MIDDLE:
+            if(event.type == glmWinEvent::ET_WHEEL_SCROLL){
+                handleWheelScroll(event);
+                break;
+            }
             break;
 
         case glmWinEvent::MB_RIGHT:
@@ -142,8 +146,19 @@ void glmTrackball::handleMouseEvent(const glmWinEvent& event)
     }
 }
 
-void glmTrackball::handleKeyboardEvent(const glmWinEvent &event)
+void glmTrackball::handleKeyboardEvent(const glmWinEvent& event)
 {
+}
+
+void glmTrackball::handleWheelScroll(const glmWinEvent& event)
+{
+    auto render_win = static_cast<RenderWindow*>(event.extra_data);
+    if(render_win){
+        render_win->fovy_ -= event.scroll_delta;
+        render_win->fovy_ = std::max(1.0f, std::min(render_win->fovy_, 45.0f));
+        spdlog::debug("Fovy:{} delta:{}", render_win->fovy_, event.scroll_delta);
+        render_win->applyFovyChanged();
+    }
 }
 
 void glmTrackball::setWindowSize(uint32_t w, uint32_t h)
@@ -152,7 +167,7 @@ void glmTrackball::setWindowSize(uint32_t w, uint32_t h)
     height_ = h;
 }
 
-void glmTrackball::handleEvent(const glmWinEvent &event)
+void glmTrackball::handleEvent(const glmWinEvent& event)
 {
     if(event.source == glmWinEvent::ES_MOUSE_DEVICE){
         handleMouseEvent(event);

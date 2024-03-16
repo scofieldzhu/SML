@@ -60,18 +60,10 @@ struct glmWinEvent
         ET_WHEEL_SCROLL
     };
     
-    enum ScrollDirection
-    {
-        SD_NULL,
-        SD_DOWN,
-        SD_UP
-    };
-
     EventSource source = ES_NULL;
     EventType type = ET_NULL;
     int event_button_id = -1;
-    ScrollDirection scroll_direction = SD_NULL;
-    float scroll_angle = 0.0f;
+    float scroll_delta = 0.0f;
     glm::vec2 pos{0.0f, 0.0f};
     void* extra_data = nullptr;
 };

@@ -51,9 +51,11 @@ public:
 protected:
     friend class glmTrackball;
     void applyModelRotate(const glm::quat& rotation);
+    void applyFovyChanged();
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
     void mouseMoveEvent(QMouseEvent*) override;
+    void wheelEvent(QWheelEvent*) override;
     glmMeshPtr cur_mesh_cloud_;
     glmBufferPtr buffer_;
     glmVertexArrayPtr vao_;
@@ -66,7 +68,7 @@ protected:
     float win_aspect_ = 1.0f;
     float near_plane_dist_ = 0.0f;
     float far_plane_dist_ = 2.0f;
-    float fovy_ = glm::radians(45.0f);
+    float fovy_ = glm::radians(20.0f);
     glm::mat4 projection_;
     std::unique_ptr<glmWinEventHandlerPublisher> handler_register_;
     std::unique_ptr<glmTrackball> trackball_;

@@ -86,11 +86,35 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
     handler_register_->publish(target_event);
 }
 
+void RenderWindow::wheelEvent(QWheelEvent* event)
+{
+    WindowQt::wheelEvent(event);
+    spdlog::debug("wheelEvent");
+
+    glmWinEvent target_event;
+    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
+    target_event.type = glmWinEvent::ET_WHEEL_SCROLL;
+    target_event.event_button_id = glmWinEvent::MB_MIDDLE;
+    target_event.scroll_delta = event->angleDelta().y() / 120.0f;
+    target_event.pos = {event->pos().x(), event->pos().y()};
+    target_event.extra_data = this;
+    handler_register_->publish(target_event);
+}
+
 void RenderWindow::applyModelRotate(const glm::quat& rotation)
 {
     makeCurrent();
     model_ = model_ * glm::toMat4(rotation);
     program_->setUniformMatrix4fv("model", model_);
+    updateGL();
+    doneCurrent();
+}
+
+void RenderWindow::applyFovyChanged()
+{
+    makeCurrent();
+    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
+    program_->setUniformMatrix4fv("projection", projection_);
     updateGL();
     doneCurrent();
 }
@@ -129,7 +153,7 @@ bool RenderWindow::initializeGL()
     view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
     win_aspect_ = (float)width() / (float)height();
-    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
     return true;
 }
@@ -153,7 +177,7 @@ void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
     view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
     far_plane_dist_ = 1.6 * diagonal_len;
-    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = std::make_shared<glmBuffer>();
@@ -185,13 +209,15 @@ void RenderWindow::deinitializeGL()
 
 void RenderWindow::resizeGL(QResizeEvent * event) 
 {
+    if(program_ == nullptr)
+        return;
     makeCurrent();
     const auto& new_size = event->size();
     glViewport(0, 0, new_size.width(), new_size.height());
     trackball_->setWindowSize(new_size.width(), new_size.height());
     win_aspect_ = (float)new_size.width() / (float)new_size.height();
     spdlog::trace("new_w:{} new_h:{} cur_w:{} cur_h:{}", new_size.width(), new_size.height(), width(), height());
-    projection_ = glm::perspective(fovy_, win_aspect_, near_plane_dist_, far_plane_dist_);
+    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
     doneCurrent();
 }
