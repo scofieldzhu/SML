@@ -54,6 +54,9 @@ class glmVertexArrayAttrib;
 class glmShaderProgram;
 using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
 
+class glmMeshRenderer;
+using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
+
 struct glmBoundingBox
 {
     glm::vec3 calcCenter()const{ return {(min[0] + max[0]) / 2.0, (min[1] + max[1]) / 2.0, (min[2] + max[2]) / 2.0}; }
@@ -61,5 +64,7 @@ struct glmBoundingBox
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
     glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
 };
+
+#define BUFFER_OFFSET(a) ((void*)(a))
 
 #endif

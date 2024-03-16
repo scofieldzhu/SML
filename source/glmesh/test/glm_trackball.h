@@ -37,9 +37,8 @@
 class glmTrackball : public glmWinEventHandler
 {
 public:
-    void setWindowSize(uint32_t w, uint32_t h);
     void handleEvent(const glmWinEvent& event) override;
-    glmTrackball();
+    glmTrackball(glmMeshRendererPtr ren);
     ~glmTrackball();
 
 private:
@@ -55,10 +54,13 @@ private:
     void handleMouseEvent(const glmWinEvent& event);
     void handleKeyboardEvent(const glmWinEvent& event);
     void handleWheelScroll(const glmWinEvent& event);
+    void handleWindowEvent(const glmWinEvent& event);
+    void handleResize(const glmWinEvent& event);
     bool left_button_pressed_ = false;
-    uint32_t width_ = 0;
-    uint32_t height_ = 0;
+    float width_ = 0.0f;
+    float height_ = 0.0f;
     glm::vec2 last_mouse_pos_;
+    glmMeshRendererPtr renderer_;
 };
 
 #endif

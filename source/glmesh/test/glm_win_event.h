@@ -39,7 +39,8 @@ struct glmWinEvent
     {
         ES_NULL,
         ES_MOUSE_DEVICE,
-        ES_KEYBOARD
+        ES_KEYBOARD,
+        ES_WIN
     };
     
     enum MouseButton
@@ -57,7 +58,8 @@ struct glmWinEvent
         ET_DOUBLE_PRESS,
         ET_RELEASE,
         ET_MOVE,
-        ET_WHEEL_SCROLL
+        ET_WHEEL_SCROLL,
+        ET_RESIZE
     };
     
     EventSource source = ES_NULL;
@@ -65,6 +67,7 @@ struct glmWinEvent
     int event_button_id = -1;
     float scroll_delta = 0.0f;
     glm::vec2 pos{0.0f, 0.0f};
+    glm::vec2 win_size{0.0f, 0.0f};
     void* extra_data = nullptr;
 };
 

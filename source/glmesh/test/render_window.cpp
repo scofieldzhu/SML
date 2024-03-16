@@ -33,29 +33,22 @@
 #include <QDir>
 #include <QResizeEvent>
 #include <QApplication>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
 #include <spdlog/spdlog.h>
-#include "glm_mesh.h"
-#include <glad/glad.h>
-#include "glm_buffer.h"
-#include "glm_vertex_array.h"
-#include "glm_vertex_array_attrib.h"
-#include "glm_shader_program.h"
 #include "glm_trackball.h"
-
-#define BUFFER_OFFSET(a) ((void*)(a))
+#include "glm_mesh_renderer.h"
 
 RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     :WindowQt(app, format),
+    renderer_(std::make_shared<glmMeshRenderer>()),
     handler_register_(std::make_unique<glmWinEventHandlerPublisher>()),
-    trackball_(std::make_unique<glmTrackball>())
+    trackball_(std::make_unique<glmTrackball>(renderer_))
 {
     handler_register_->addHandler(trackball_.get());
 }
 
 RenderWindow::~RenderWindow()
 {
+    trackball_ = nullptr;
 }
 
 void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
@@ -63,6 +56,7 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
     WindowQt::mouseReleaseEvent(event);
     spdlog::debug("mouseReleaseEvent:{}", (int)event->button());
 
+    makeCurrent();
     glmWinEvent target_event;
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_RELEASE;
@@ -70,6 +64,8 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
     handler_register_->publish(target_event);
+    updateGL();
+    doneCurrent();
 }
 
 void RenderWindow::mouseMoveEvent(QMouseEvent* event)
@@ -77,6 +73,7 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
     WindowQt::mouseMoveEvent(event);
     spdlog::debug("mouseMoveEvent:{}", (int)event->button());
 
+    makeCurrent();
     glmWinEvent target_event;
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_MOVE;
@@ -84,6 +81,8 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
     handler_register_->publish(target_event);
+    updateGL();
+    doneCurrent();
 }
 
 void RenderWindow::wheelEvent(QWheelEvent* event)
@@ -91,6 +90,7 @@ void RenderWindow::wheelEvent(QWheelEvent* event)
     WindowQt::wheelEvent(event);
     spdlog::debug("wheelEvent");
 
+    makeCurrent();
     glmWinEvent target_event;
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_WHEEL_SCROLL;
@@ -99,31 +99,16 @@ void RenderWindow::wheelEvent(QWheelEvent* event)
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
     handler_register_->publish(target_event);
-}
-
-void RenderWindow::applyModelRotate(const glm::quat& rotation)
-{
-    makeCurrent();
-    model_ = model_ * glm::toMat4(rotation);
-    program_->setUniformMatrix4fv("model", model_);
     updateGL();
     doneCurrent();
 }
 
-void RenderWindow::applyFovyChanged()
-{
-    makeCurrent();
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
-    updateGL();
-    doneCurrent();
-}
-
-void RenderWindow::mousePressEvent(QMouseEvent *event)
+void RenderWindow::mousePressEvent(QMouseEvent* event)
 {
     WindowQt::mousePressEvent(event);
     spdlog::debug("mousePressEvent:{}", (int)event->button());
 
+    makeCurrent();
     glmWinEvent target_event;
     target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
     target_event.type = glmWinEvent::ET_PRESSE;
@@ -131,106 +116,47 @@ void RenderWindow::mousePressEvent(QMouseEvent *event)
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
     handler_register_->publish(target_event);
+    updateGL();
+    doneCurrent();
 }
 
 bool RenderWindow::initializeGL() 
 {
-    if(!gladLoadGL()){
-        spdlog::error("gladLoadGL failed!");
-        return false;
-    }
-    program_ = std::make_shared<glmShaderProgram>();
-    if(!program_->addShaderFile("shader.vert", GL_VERTEX_SHADER))
-        return false;
-    if(!program_->addShaderFile("shader.frag", GL_FRAGMENT_SHADER))
-        return false;
-    if(!program_->link())
-        return false;
-    program_->use();
-
-    model_ = glm::identity<glm::mat4>();
-    program_->setUniformMatrix4fv("model", model_);
-    view_  = glm::lookAt(eye_, focal_point_, viewup_);
-    program_->setUniformMatrix4fv("view", view_);
-    win_aspect_ = (float)width() / (float)height();
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
-    return true;
+    return renderer_->initialize(width(), height());
 }
 
 void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
     makeCurrent();
-    cur_mesh_cloud_ = mesh_cloud;
-    if(mesh_cloud->vertex_list.empty()){
-        spdlog::warn("Mesh cloud contain a empty vertex list!");
-        return;
-    }
-    auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
-    glm::vec3 center_point = boundingbox.calcCenter();
-    float diagonal_len = boundingbox.calcDiagonalLength();
-    spdlog::info("diagonal_len:{}", diagonal_len);
-    //translate center of point cloud to origin point {0.0, 0.0, 0.0}
-    model_ = glm::translate(glm::mat4(1.0), -center_point);
-    program_->setUniformMatrix4fv("model", model_);
-    eye_ = {0.0f, 0.0f, diagonal_len};
-    view_  = glm::lookAt(eye_, focal_point_, viewup_);
-    program_->setUniformMatrix4fv("view", view_);
-    far_plane_dist_ = 1.6 * diagonal_len;
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
-
-    buffer_ = std::make_shared<glmBuffer>();
-    const GLuint kTotalSize = kVertexSize * mesh_cloud->vertex_list.size();
-    buffer_->allocate(kTotalSize, mesh_cloud->vertex_list.data(), 0);
-    vao_ = std::make_shared<glmVertexArray>();
-    vao_->bindCurrent();
-    vao_->bindBuffer(buffer_->id());
-    vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-    vao_->getAttrib(0)->enable();
-
-    glm::mat4 final_mat = projection_ * view_ * model_;
-    glm::vec4 transformed_point = final_mat * glm::vec4(center_point, 1.0);
-    spdlog::info("focal_point:[{},{}, {}] transformed point:[{},{}, {}]", 
-        center_point[0], center_point[1], center_point[2], 
-        transformed_point[0]/transformed_point[3], transformed_point[1]/transformed_point[3], transformed_point[2]/transformed_point[3]
-    );
-
+    renderer_->loadMeshCloud(mesh_cloud);
     updateGL();
     doneCurrent();
 }
 
 void RenderWindow::deinitializeGL() 
 {
-    program_.reset();
-    buffer_.reset();
-    vao_.reset();
+    renderer_->destroy();
 }
 
-void RenderWindow::resizeGL(QResizeEvent * event) 
+void RenderWindow::resizeGL(QResizeEvent* event) 
 {
-    if(program_ == nullptr)
-        return;
     makeCurrent();
     const auto& new_size = event->size();
-    glViewport(0, 0, new_size.width(), new_size.height());
-    trackball_->setWindowSize(new_size.width(), new_size.height());
-    win_aspect_ = (float)new_size.width() / (float)new_size.height();
-    spdlog::trace("new_w:{} new_h:{} cur_w:{} cur_h:{}", new_size.width(), new_size.height(), width(), height());
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
+    renderer_->resize(new_size.width(), new_size.height());
+
+    glmWinEvent target_event;
+    target_event.source = glmWinEvent::ES_WIN;
+    target_event.type = glmWinEvent::ET_RESIZE;
+    target_event.win_size = {(float)new_size.width(), (float)new_size.height()};
+    target_event.extra_data = this;
+    handler_register_->publish(target_event);
+    updateGL();
     doneCurrent();
 }
 
 void RenderWindow::paintGL() 
 {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
-    if(vao_){
-        vao_->bindCurrent();
-        glDrawArrays(GL_POINTS, 0, cur_mesh_cloud_->vertex_list.size());
-    }
-    spdlog::info("PaintGL called!");
+    renderer_->render();
 }
 
 void RenderWindow::keyPressEvent(QKeyEvent * event) 

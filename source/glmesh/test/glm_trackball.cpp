@@ -30,9 +30,10 @@
 
 #include "glm_trackball.h"
 #include <spdlog/spdlog.h>
-#include "render_window.h"
+#include "glm_mesh_renderer.h"
 
-glmTrackball::glmTrackball()
+glmTrackball::glmTrackball(glmMeshRendererPtr ren)
+    :renderer_(ren)
 {
 }
 
@@ -54,11 +55,11 @@ glm::quat glmTrackball::rotate(const glm::vec2& start_pos, const glm::vec2& end_
 
 glm::vec3 glmTrackball::mapToSphere(const glm::vec2& win_pos) const
 {
-    float x = (2.0 * win_pos.x - (float)width_) / (float)width_;
-    float y = (height_ - 2.0 * win_pos.y) / (float)height_;
+    float x = (2.0f * win_pos.x - (float)width_) / (float)width_;
+    float y = (height_ - 2.0f * win_pos.y) / (float)height_;
     float len_squared = x * x + y * y;
     if(len_squared <= 1.0f){ //lies inside of sphere 
-        return glm::vec3(x, y, sqrt(1.0 - len_squared));
+        return glm::vec3(x, y, sqrt(1.0f - len_squared));
     }else{
         float length = std::sqrt(len_squared);
         return glm::vec3(x / length, y / length, 0.0f);
@@ -81,10 +82,11 @@ void glmTrackball::handleMouseMove(const glmWinEvent& event)
 {
     spdlog::debug("handleMouseMove! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
     if(left_button_pressed_){
-        auto render_win = static_cast<RenderWindow*>(event.extra_data);
         glm::vec2 now_pos = event.pos;
         auto quad = rotate(last_mouse_pos_, now_pos);
-        render_win->applyModelRotate(quad);
+        auto mat = renderer_->modelMat();
+        mat = mat * glm::toMat4(quad);
+        renderer_->setModelMat(mat);
         last_mouse_pos_ = now_pos;
     }
 }
@@ -152,19 +154,24 @@ void glmTrackball::handleKeyboardEvent(const glmWinEvent& event)
 
 void glmTrackball::handleWheelScroll(const glmWinEvent& event)
 {
-    auto render_win = static_cast<RenderWindow*>(event.extra_data);
-    if(render_win){
-        render_win->fovy_ -= event.scroll_delta;
-        render_win->fovy_ = std::max(1.0f, std::min(render_win->fovy_, 45.0f));
-        spdlog::debug("Fovy:{} delta:{}", render_win->fovy_, event.scroll_delta);
-        render_win->applyFovyChanged();
+    float fv = renderer_->cameraFovy();
+    fv -= event.scroll_delta;
+    fv = std::max(1.0f, std::min(fv, 45.0f));
+    renderer_->setCameraFovy(fv);
+}
+
+void glmTrackball::handleWindowEvent(const glmWinEvent& event)
+{
+    if(event.type == glmWinEvent::ET_RESIZE){
+        handleResize(event);
+        return;
     }
 }
 
-void glmTrackball::setWindowSize(uint32_t w, uint32_t h)
+void glmTrackball::handleResize(const glmWinEvent& event)
 {
-    width_ = w;
-    height_ = h;
+    width_ = event.win_size.x;
+    height_ = event.win_size.y;
 }
 
 void glmTrackball::handleEvent(const glmWinEvent& event)
@@ -175,6 +182,10 @@ void glmTrackball::handleEvent(const glmWinEvent& event)
     }
     if(event.source == glmWinEvent::ES_KEYBOARD){
         handleKeyboardEvent(event);
+        return;
+    }
+    if(event.source == glmWinEvent::ES_WIN){
+        handleWindowEvent(event);
         return;
     }
     spdlog::warn("Invalid event source:{} identified!", (int)event.source);
