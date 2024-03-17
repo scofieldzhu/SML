@@ -13,22 +13,7 @@ void main()
 {
     gl_Position = projection * view * model * vPosition;
 })";
-    const char* kFragmentShaderSource = R"(// #version 140
-// #extension GL_ARB_explicit_attrib_location : require
-
-// out vec4 FragColor;
-// //layout (location = 0) out vec4 fragColor;
-
-// in vec4 color;
-
-// void main()
-// {
-//     FragColor = color;
-//     //fragColor = vec4(fragColor.x, 0.0, fragColor.y, 1.0);
-// }
-
-
-#version 450 core
+    const char* kFragmentShaderSource = R"(#version 450 core
 
 out vec4 fColor;
 

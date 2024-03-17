@@ -42,8 +42,6 @@ GLMESH_NAMESPACE_BEGIN
 
 using VertexList = std::vector<glm::vec3>;
 
-constexpr uint32_t kVertexSize = sizeof(glm::vec3);
-
 struct glmMesh;
 using glmMeshPtr = std::shared_ptr<glmMesh>;
 

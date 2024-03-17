@@ -31,18 +31,20 @@
 #ifndef __glm_mesh_h__
 #define __glm_mesh_h__
 
-#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_facet.h"
 #include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
 struct GLMESH_API glmMesh
 {
-    bool isNull()const{ return vertex_list.empty(); }
-    bool isNonNull()const{ return !isNull(); }
+    using VertexListType = std::vector<glm::vec3>;
+    bool valid()const{ return vertex_pts.empty(); }
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
-    VertexList vertex_list;
+    size_t calcByteSizeOfFacets()const;
+    VertexListType vertex_pts;
+    glmFacets facets;
 };
 
 GLMESH_NAMESPACE_END

@@ -31,12 +31,12 @@
 #ifndef __ply_reader_h__
 #define __ply_reader_h__
 
-#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_mesh.h"
 #include <QString>
 
 namespace ply_reader
 {
-    bool LoadFile(const QString& file, glmesh::VertexList& result_points);
+    bool LoadFile(const QString& file, glmesh::glmMesh& result_mesh);
 };
 
 #endif

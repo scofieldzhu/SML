@@ -29,26 +29,41 @@
  */
 
 #include "ply_reader.h"
-#include <QFile>
-#include <QDebug>
 #include <pcl/io/ply_io.h>
 #include <pcl/point_types.h> 
 #include <pcl/point_cloud.h> 
+#include <pcl/PolygonMesh.h>
 #include <spdlog/spdlog.h>
 using namespace pcl;
 using namespace glmesh;
 
-bool ply_reader::LoadFile(const QString& filename, VertexList& vertices)
+bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
 {
-    PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-    PLYReader reader;
-    if(reader.read(filename.toLocal8Bit().toStdString().c_str(), *cloud) == -1){
-        SPDLOG_ERROR("Read cloud data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
-        return false;
+    {
+        PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
+        PLYReader reader;
+        if(reader.read(filename.toLocal8Bit().toStdString().c_str(), *cloud) == -1){
+            SPDLOG_ERROR("Read point data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
+            return false;
+        }
+        result_mesh.vertex_pts.clear();
+        for(const auto& pt : *cloud)
+            result_mesh.vertex_pts.push_back({pt.x, pt.y, pt.z});
+        SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", result_mesh.vertex_pts.size(), filename.toLocal8Bit().toStdString());        
     }
-    vertices.clear();
-    for(const auto& pt : *cloud)
-        vertices.push_back({pt.x, pt.y, pt.z});
-    SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", vertices.size(), filename.toLocal8Bit().toStdString());
+    {
+        pcl::PolygonMesh mesh;
+        if (pcl::io::loadPLYFile(filename.toLocal8Bit().toStdString().c_str(), mesh) == -1) {
+            SPDLOG_ERROR("Read mesh data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
+            return true;
+        }
+        result_mesh.facets.clear();
+        for(const auto& vt : mesh.polygons){
+            glmFacet ft;
+            for(const auto& id : vt.vertices)
+                ft.indices.push_back(id);   
+            result_mesh.facets.push_back(std::move(ft));
+        }
+    }
     return true;
 }

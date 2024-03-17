@@ -7,9 +7,10 @@ find_package(glm REQUIRED COMPONENTS glm::glm)
 
 set(EXPORT_HEAD_FILES
     "glm_nsp.h"
+    "glm_export.h"
     "glm_base_type.h"
     "glm_buffer.h"
-    "glm_export.h"
+    "glm_facet.h"
     "glm_mesh.h"
     "glm_mesh_renderer.h"
     "glm_shader_program.h"

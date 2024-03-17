@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: main.cpp 
+ *  File: glm_vindice.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,55 +28,22 @@
  *  SOFTWARE.
  */
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QSurfaceFormat>
-#include <QTimer>
-#include <QThread>
-#include <spdlog/spdlog.h>
-#include "render_window.h"
-#include "ply_reader.h"
-#include "glmesh/core/glm_mesh.h"
-using namespace glmesh;
+#ifndef __glm_facet_h__
+#define __glm_facet_h__
 
-RenderWindow* stRenderWindow = nullptr;
+#include "glmesh/core/glm_base_type.h"
 
-void LoadMeshData()
+GLMESH_NAMESPACE_BEGIN
+
+struct glmFacet
 {
-    QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
-    glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
-    ply_reader::LoadFile(data_file, *mesh_cloud);
-    stRenderWindow->loadMeshCloud(mesh_cloud);
-}
+    using IndicesType = std::vector<uint32_t>;
+    size_t byteSize()const{ return sizeof(uint32_t) * indices.size(); }
+    IndicesType indices;
+};
 
-int main(int argc, char * argv[])
-{
-    spdlog::set_level(spdlog::level::trace);
+using glmFacets = std::vector<glmFacet>;
 
-    spdlog::info("Main thread id:{}", QThread::currentThreadId());
+GLMESH_NAMESPACE_END
 
-    QApplication app(argc, argv);
-
-    QSurfaceFormat format;
-#ifdef __APPLE__
-    format.setVersion(4, 6);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-#else
-    format.setVersion(4, 6);
-    format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
-    format.setDepthBufferSize(16);
-
-    QMainWindow window;
-    window.setMinimumSize(640, 480);
-    window.setWindowTitle("globjects and Qt");
-    stRenderWindow = new RenderWindow(app, format);
-    window.setCentralWidget(QWidget::createWindowContainer(stRenderWindow, &window));
-
-    QTimer::singleShot(2000, LoadMeshData);
-
-    window.show();
-
-    return app.exec();
-}
-

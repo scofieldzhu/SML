@@ -54,7 +54,7 @@ glmMeshRenderer::~glmMeshRenderer()
 void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
     cur_mesh_cloud_ = mesh_cloud;
-    if(mesh_cloud->vertex_list.empty()){
+    if(mesh_cloud->valid()){
         spdlog::warn("Mesh cloud contain a empty vertex list!");
         return;
     }
@@ -73,8 +73,8 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = std::make_shared<glmBuffer>();
-    const uint32_t kTotalSize = kVertexSize * static_cast<uint32_t>(mesh_cloud->vertex_list.size());
-    buffer_->allocate(kTotalSize, mesh_cloud->vertex_list.data(), 0);
+    const uint32_t kTotalSize = sizeof(glm::vec3) * static_cast<uint32_t>(mesh_cloud->vertex_pts.size());
+    buffer_->allocate(kTotalSize, mesh_cloud->vertex_pts.data(), 0);
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(buffer_->id());
@@ -95,7 +95,7 @@ bool glmMeshRenderer::initialize(float width, float height)
     program_ = std::make_shared<glmShaderProgram>();
     if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
         return false;
-    if(!program_->addShaderFile(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
+    if(!program_->addShaderSource(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
         return false;
     if(!program_->link())
         return false;
@@ -138,7 +138,7 @@ void glmMeshRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     if(vao_){
         vao_->bindCurrent();
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_list.size()));
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_pts.size()));
     }
     spdlog::info("Render called!");
 }
