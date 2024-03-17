@@ -39,8 +39,18 @@
 #include "glm_vertex_array_attrib.h"
 #include "glm_shader_program.h"
 #include "glm_shader_source.h"
+#include "glm_memory_block.h"
 
 GLMESH_NAMESPACE_BEGIN
+
+namespace{
+  std::map<glmDisplayMode, GLuint> stDisplayModeDict = 
+  {
+    {glmDisplayMode::kPoint, GL_POINT},
+    {glmDisplayMode::kWire, GL_LINE},
+    {glmDisplayMode::kFacet, GL_FILL}
+  };
+} 
 
 glmMeshRenderer::glmMeshRenderer()
 {
@@ -72,12 +82,19 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 
-    buffer_ = std::make_shared<glmBuffer>();
+    buffer_ = std::make_shared<glmBuffer>(GL_ARRAY_BUFFER);
     const uint32_t kTotalSize = sizeof(glm::vec3) * static_cast<uint32_t>(mesh_cloud->vertex_pts.size());
     buffer_->allocate(kTotalSize, mesh_cloud->vertex_pts.data(), 0);
+
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
-    vao_->bindBuffer(buffer_->id());
+    vao_->bindBuffer(*buffer_);
+    if(mesh_cloud->facets.valid()){
+        indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
+        auto indices_memory_block = mesh_cloud->facets.allocMemoryBlock();
+        indices_buffer_->allocate(static_cast<uint32_t>(indices_memory_block->size()), indices_memory_block->blockData(), 0);
+        vao_->bindBuffer(*indices_buffer_);
+    }
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     vao_->getAttrib(0)->enable();
 }
@@ -132,13 +149,24 @@ void glmMeshRenderer::setCameraFovy(float fovy)
     program_->setUniformMatrix4fv("projection", projection_);
 }
 
+void glmMeshRenderer::setDispalyMode(glmDisplayMode m)
+{
+    display_mode_ = m;
+}
+
 void glmMeshRenderer::render()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     if(vao_){
         vao_->bindCurrent();
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_pts.size()));
+        auto gl_mode = stDisplayModeDict[display_mode_];
+        if(gl_mode == GL_POINT){
+            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_pts.size()));
+        }else{
+            glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->facets.indicesCount()), GL_UNSIGNED_INT, 0);
+        }
     }
     spdlog::info("Render called!");
 }

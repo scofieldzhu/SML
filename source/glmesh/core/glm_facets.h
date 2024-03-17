@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_vindice.h 
+ *  File: glm_facets.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,10 +28,11 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_facet_h__
-#define __glm_facet_h__
+#ifndef __glm_facets_h__
+#define __glm_facets_h__
 
 #include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -42,7 +43,15 @@ struct glmFacet
     IndicesType indices;
 };
 
-using glmFacets = std::vector<glmFacet>;
+struct GLMESH_API glmFacets
+{
+    bool valid()const{ return !data.empty(); }
+    size_t indicesCount()const;
+    size_t calcByteSize()const;    
+    glmMemoryBlockPtr allocMemoryBlock()const;
+    using FacetListType = std::vector<glmFacet>;
+    FacetListType data;
+};
 
 GLMESH_NAMESPACE_END
 

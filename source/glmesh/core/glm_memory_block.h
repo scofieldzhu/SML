@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_buffer.cpp 
+ *  File: glm_memory_block.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,25 +28,29 @@
  *  SOFTWARE.
  */
 
-#include "glm_buffer.h"
-#include "glad/glad.h"
+#ifndef __glm_memory_block_h__
+#define __glm_memory_block_h__
+
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-glmBuffer::glmBuffer(uint32_t type)
-    :type_(type)
+struct GLMESH_API glmMemoryBlock
 {
-    glCreateBuffers(1, &id_);
-}
+    const char* blockData()const{ return block_data_; }
+    char* blockData(){ return block_data_; }
+    auto size()const{ return size_; }
+    explicit glmMemoryBlock(size_t s);
+    ~glmMemoryBlock();
 
-glmBuffer::~glmBuffer()
-{
-    glDeleteBuffers(1, &id_);
-}
+private:
+    char* block_data_ = nullptr;
+    size_t size_;
+};
 
-void glmBuffer::allocate(uint32_t size, void* data, uint32_t flags)
-{
-    glNamedBufferStorage(id_, size, data, flags);
-}
+using glmMemoryBlockPtr = std::shared_ptr<glmMemoryBlock>;
 
 GLMESH_NAMESPACE_END
+
+#endif

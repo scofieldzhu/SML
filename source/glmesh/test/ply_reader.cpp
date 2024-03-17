@@ -48,8 +48,7 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
         }
         result_mesh.vertex_pts.clear();
         for(const auto& pt : *cloud)
-            result_mesh.vertex_pts.push_back({pt.x, pt.y, pt.z});
-        SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", result_mesh.vertex_pts.size(), filename.toLocal8Bit().toStdString());        
+            result_mesh.vertex_pts.push_back({pt.x, pt.y, pt.z});        
     }
     {
         pcl::PolygonMesh mesh;
@@ -57,13 +56,14 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
             SPDLOG_ERROR("Read mesh data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
             return true;
         }
-        result_mesh.facets.clear();
+        result_mesh.facets.data.clear();
         for(const auto& vt : mesh.polygons){
             glmFacet ft;
             for(const auto& id : vt.vertices)
                 ft.indices.push_back(id);   
-            result_mesh.facets.push_back(std::move(ft));
+            result_mesh.facets.data.push_back(std::move(ft));
         }
     }
+    SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", result_mesh.vertex_pts.size(), filename.toLocal8Bit().toStdString());        
     return true;
 }

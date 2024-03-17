@@ -30,6 +30,7 @@
 
 #include "glm_vertex_array.h"
 #include "glad/glad.h"
+#include "glm_buffer.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -47,9 +48,9 @@ void glmVertexArray::bindCurrent()
     glBindVertexArray(id_);
 }
 
-void glmVertexArray::bindBuffer(uint32_t buffer_id)
+void glmVertexArray::bindBuffer(const glmBuffer& buffer)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+    glBindBuffer(buffer.type(), buffer.id());
 }
 
 glmVertexArrayAttrib* glmVertexArray::getAttrib(uint32_t index)

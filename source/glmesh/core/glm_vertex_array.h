@@ -41,7 +41,7 @@ class GLMESH_API glmVertexArray
 {
 public:
     void bindCurrent();
-    void bindBuffer(uint32_t buffer_id);
+    void bindBuffer(const glmBuffer& buffer);
     uint32_t id()const{ return id_; }
     glmVertexArrayAttrib* getAttrib(uint32_t index);
     glmVertexArray& operator=(const glmVertexArray&) = delete;

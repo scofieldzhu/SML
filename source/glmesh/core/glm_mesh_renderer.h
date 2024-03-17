@@ -49,6 +49,8 @@ public:
     glm::mat4 modelMat(){ return model_; }
     float cameraFovy()const{ return fovy_; }
     void setCameraFovy(float fovy);
+    void setDispalyMode(glmDisplayMode m);
+    auto displayMode()const;
     void render();
     glmMeshRenderer();
     ~glmMeshRenderer();
@@ -57,6 +59,7 @@ private:
     glm::vec2 render_size_;
     glmMeshPtr cur_mesh_cloud_;
     glmBufferPtr buffer_;
+    glmBufferPtr indices_buffer_;
     glmVertexArrayPtr vao_;
     glmShaderProgramPtr program_;
     glm::mat4 model_;
@@ -69,6 +72,7 @@ private:
     float far_plane_dist_ = 2.0f;
     float fovy_ = 45.0f;
     glm::mat4 projection_;
+    glmDisplayMode display_mode_ = glmDisplayMode::kPoint;
     bool initialized_ = false;
 };
 

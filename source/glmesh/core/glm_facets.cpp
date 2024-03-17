@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_buffer.cpp 
+ *  File: glm_facets.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,25 +28,36 @@
  *  SOFTWARE.
  */
 
-#include "glm_buffer.h"
-#include "glad/glad.h"
+#include "glm_facets.h"
+#include "glm_memory_block.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-glmBuffer::glmBuffer(uint32_t type)
-    :type_(type)
+size_t glmFacets::calcByteSize() const
 {
-    glCreateBuffers(1, &id_);
+    return sizeof(uint32_t) * indicesCount();
 }
 
-glmBuffer::~glmBuffer()
+size_t glmFacets::indicesCount() const
 {
-    glDeleteBuffers(1, &id_);
+    size_t total_indices_count = 0;
+    for(const auto& ft : data)
+        total_indices_count += ft.indices.size();
+    return total_indices_count;
 }
 
-void glmBuffer::allocate(uint32_t size, void* data, uint32_t flags)
+glmMemoryBlockPtr glmFacets::allocMemoryBlock()const
 {
-    glNamedBufferStorage(id_, size, data, flags);
+    size_t total_size = calcByteSize();
+    if(total_size == 0)
+        return nullptr;
+    auto data_block = std::make_shared<glmMemoryBlock>(total_size);
+    auto cur_data = data_block->blockData();
+    for(auto& ft : data){
+        memcpy(cur_data, static_cast<const uint32_t*>(ft.indices.data()), ft.byteSize());
+        cur_data += ft.byteSize();
+    }
+    return data_block;
 }
 
 GLMESH_NAMESPACE_END

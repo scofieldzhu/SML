@@ -45,6 +45,7 @@ RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
     trackball_(std::make_unique<glmTrackball>(renderer_))
 {
     handler_register_->addHandler(trackball_.get());
+    //renderer_->setDispalyMode(glmDisplayMode::kFacet);
 }
 
 RenderWindow::~RenderWindow()

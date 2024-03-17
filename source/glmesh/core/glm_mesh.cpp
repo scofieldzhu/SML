@@ -57,10 +57,4 @@ glm::vec3 glmMesh::calcCenterPoint() const
     return  center * (1.0f / vertex_pts.size());
 }
 
-size_t glmMesh::calcByteSizeOfFacets() const
-{
-    assert(valid());
-    return facets.size() * facets[0].byteSize();
-}
-
 GLMESH_NAMESPACE_END

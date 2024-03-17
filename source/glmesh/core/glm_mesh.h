@@ -31,7 +31,7 @@
 #ifndef __glm_mesh_h__
 #define __glm_mesh_h__
 
-#include "glmesh/core/glm_facet.h"
+#include "glmesh/core/glm_facets.h"
 #include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
@@ -42,7 +42,6 @@ struct GLMESH_API glmMesh
     bool valid()const{ return vertex_pts.empty(); }
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
-    size_t calcByteSizeOfFacets()const;
     VertexListType vertex_pts;
     glmFacets facets;
 };

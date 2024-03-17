@@ -40,7 +40,8 @@
 
 GLMESH_NAMESPACE_BEGIN
 
-using VertexList = std::vector<glm::vec3>;
+struct glmMemoryBlock;
+using glmMemoryBlockPtr = std::shared_ptr<glmMemoryBlock>;
 
 struct glmMesh;
 using glmMeshPtr = std::shared_ptr<glmMesh>;
@@ -68,6 +69,13 @@ struct glmBoundingBox
     float calcDiagonalLength()const{ return glm::distance(min, max); }
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
     glm::vec3 max = glm::vec3(std::numeric_limits<float>::min());
+};
+
+enum class glmDisplayMode
+{
+    kPoint,
+    kWire,
+    kFacet
 };
 
 GLMESH_NAMESPACE_END

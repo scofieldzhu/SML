@@ -39,13 +39,15 @@ GLMESH_NAMESPACE_BEGIN
 class GLMESH_API glmBuffer
 {
 public:
-    uint32_t id()const{ return id_; }
-    void allocate(uint32_t size, void* data, uint32_t flags);
-    glmBuffer();
+    auto type()const{ return type_; }
+    auto id()const{ return id_; }
+    void allocate(uint32_t size, void* data, uint32_t flags);    
+    glmBuffer(uint32_t type);
     ~glmBuffer();
 
 private:
     uint32_t id_ = 0;
+    uint32_t type_;
 };
 
 GLMESH_NAMESPACE_END
