@@ -41,7 +41,8 @@ class GLMESH_API glmBuffer
 public:
     auto type()const{ return type_; }
     auto id()const{ return id_; }
-    void allocate(uint32_t size, void* data, uint32_t flags);    
+    void allocate(uint32_t size, const void* data, uint32_t flags);    
+    void allocateSub(int32_t offset, uint32_t size, const void* data);
     glmBuffer(uint32_t type);
     ~glmBuffer();
 

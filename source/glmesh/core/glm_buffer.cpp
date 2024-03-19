@@ -44,9 +44,14 @@ glmBuffer::~glmBuffer()
     glDeleteBuffers(1, &id_);
 }
 
-void glmBuffer::allocate(uint32_t size, void* data, uint32_t flags)
+void glmBuffer::allocate(uint32_t size, const void* data, uint32_t flags)
 {
     glNamedBufferStorage(id_, size, data, flags);
+}
+
+void glmBuffer::allocateSub(int32_t offset, uint32_t size, const void* data)
+{
+    glBufferSubData(id_, offset, size, data);
 }
 
 GLMESH_NAMESPACE_END

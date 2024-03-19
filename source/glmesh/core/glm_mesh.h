@@ -31,7 +31,7 @@
 #ifndef __glm_mesh_h__
 #define __glm_mesh_h__
 
-#include "glmesh/core/glm_facets.h"
+#include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
@@ -39,11 +39,15 @@ GLMESH_NAMESPACE_BEGIN
 struct GLMESH_API glmMesh
 {
     using VertexListType = std::vector<glm::vec3>;
-    bool valid()const{ return vertex_pts.empty(); }
+    using ColorListType = std::vector<glm::vec4>;
+    using TriangleFacetType = glm::u32vec3;
+    using TriangleFacetList = std::vector<TriangleFacetType>;
+    bool valid()const{ return vertices.empty(); }
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
-    VertexListType vertex_pts;
-    glmFacets facets;
+    VertexListType vertices;
+    ColorListType colors;
+    TriangleFacetList triangle_facets;
 };
 
 GLMESH_NAMESPACE_END

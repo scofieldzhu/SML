@@ -33,37 +33,57 @@
 #include <pcl/point_types.h> 
 #include <pcl/point_cloud.h> 
 #include <pcl/PolygonMesh.h>
+#include <pcl/surface/ear_clipping.h>
 #include <spdlog/spdlog.h>
 using namespace pcl;
 using namespace glmesh;
 
 bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
 {
-    {
-        PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-        PLYReader reader;
-        if(reader.read(filename.toLocal8Bit().toStdString().c_str(), *cloud) == -1){
-            SPDLOG_ERROR("Read point data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
-            return false;
-        }
-        result_mesh.vertex_pts.clear();
-        for(const auto& pt : *cloud)
-            result_mesh.vertex_pts.push_back({pt.x, pt.y, pt.z});        
+    pcl::PolygonMesh mesh;
+    if (pcl::io::loadPLYFile(filename.toLocal8Bit().toStdString().c_str(), mesh) == -1) {
+        spdlog::error("Read mesh data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
+        return false;
     }
-    {
-        pcl::PolygonMesh mesh;
-        if (pcl::io::loadPLYFile(filename.toLocal8Bit().toStdString().c_str(), mesh) == -1) {
-            SPDLOG_ERROR("Read mesh data from ply file:'{}' failed!", filename.toLocal8Bit().toStdString());
-            return true;
-        }
-        result_mesh.facets.data.clear();
-        for(const auto& vt : mesh.polygons){
-            glmFacet ft;
-            for(const auto& id : vt.vertices)
-                ft.indices.push_back(id);   
-            result_mesh.facets.data.push_back(std::move(ft));
+    if(mesh.cloud.fields.empty()){
+        spdlog::error("Error: No vertex data found in the PLY file:{}.", filename.toLocal8Bit().toStdString());
+        return false;
+    }
+    result_mesh.vertices.clear();
+    for(size_t i = 0; i < mesh.cloud.data.size(); i += mesh.cloud.point_step){
+        float x = *reinterpret_cast<float*>(&mesh.cloud.data[i + mesh.cloud.fields[0].offset]);
+        float y = *reinterpret_cast<float*>(&mesh.cloud.data[i + mesh.cloud.fields[1].offset]);
+        float z = *reinterpret_cast<float*>(&mesh.cloud.data[i + mesh.cloud.fields[2].offset]);
+        result_mesh.vertices.push_back({x, y, z}); 
+    }
+    result_mesh.colors.clear();
+    if(mesh.cloud.fields.size() >= 6){
+        for(size_t i = 0; i < mesh.cloud.data.size(); i += mesh.cloud.point_step){
+            unsigned char r = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[3].offset]);
+            unsigned char g = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[4].offset]);
+            unsigned char b = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[5].offset]);
+            unsigned char a = 255;
+            if(mesh.cloud.fields.size() == 7)
+                a = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[6].offset]);
+            glm::vec4 clr = {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
+            result_mesh.colors.push_back(std::move(clr));
         }
     }
-    SPDLOG_INFO("Read {} vertexes from cloud file:{} successfully!", result_mesh.vertex_pts.size(), filename.toLocal8Bit().toStdString());        
+    // triangulation!
+    result_mesh.triangle_facets.clear();
+    if(mesh.polygons.empty()){
+        spdlog::warn("No facet data found in ply file:{}!", filename.toLocal8Bit().toStdString());
+        return true;
+    }
+    pcl::EarClipping ear_clipping;
+    ear_clipping.setInputMesh(std::make_shared<pcl::PolygonMesh>(mesh));
+    pcl::PolygonMesh output_mesh;
+    ear_clipping.process(output_mesh);
+    for(const auto& polygon : mesh.polygons){
+        assert(polygon.vertices.size() == 3);
+        result_mesh.triangle_facets.push_back(glmMesh::TriangleFacetType(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
+    }
+    spdlog::info("Vertices count:{} Color count:{} Triangle facet count:{}!", result_mesh.vertices.size(), result_mesh.colors.size(), result_mesh.triangle_facets.size());
+    SPDLOG_INFO("Read cloud file:{} successfully!", filename.toLocal8Bit().toStdString());        
     return true;
 }

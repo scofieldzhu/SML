@@ -35,7 +35,7 @@ GLMESH_NAMESPACE_BEGIN
 glmBoundingBox glmMesh::calcBoundingBox() const
 {
     glmBoundingBox box;
-    for(const auto& v : vertex_pts) {
+    for(const auto& v : vertices) {
         box.min.x = std::min(box.min.x, v.x);
         box.min.y = std::min(box.min.y, v.y);
         box.min.z = std::min(box.min.z, v.z);
@@ -49,12 +49,12 @@ glmBoundingBox glmMesh::calcBoundingBox() const
 glm::vec3 glmMesh::calcCenterPoint() const
 {
     glm::vec3 center(0.0f, 0.0f, 0.0f);
-    for(const auto& v : vertex_pts){
+    for(const auto& v : vertices){
         center[0] += v[0];
         center[1] += v[1];
         center[2] += v[2];
     }
-    return  center * (1.0f / vertex_pts.size());
+    return  center * (1.0f / vertices.size());
 }
 
 GLMESH_NAMESPACE_END

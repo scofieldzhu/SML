@@ -83,16 +83,17 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = std::make_shared<glmBuffer>(GL_ARRAY_BUFFER);
-    const uint32_t kTotalSize = sizeof(glm::vec3) * static_cast<uint32_t>(mesh_cloud->vertex_pts.size());
-    buffer_->allocate(kTotalSize, mesh_cloud->vertex_pts.data(), 0);
+    const uint32_t kTotalSize = sizeof(glm::vec3) * static_cast<uint32_t>(mesh_cloud->vertices.size());
+    buffer_->allocate(kTotalSize, mesh_cloud->vertices.data(), 0);
 
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(*buffer_);
-    if(mesh_cloud->facets.valid()){
+    if(!mesh_cloud->triangle_facets.empty()){
         indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
-        auto indices_memory_block = mesh_cloud->facets.allocMemoryBlock();
-        indices_buffer_->allocate(static_cast<uint32_t>(indices_memory_block->size()), indices_memory_block->blockData(), 0);
+        //auto indices_memory_block = mesh_cloud->facets.allocMemoryBlock();
+        auto total_facets_byte_size = sizeof(glmMesh::TriangleFacetType) * mesh_cloud->triangle_facets.size();
+        indices_buffer_->allocate(static_cast<uint32_t>(total_facets_byte_size), mesh_cloud->triangle_facets.data(), 0);
         vao_->bindBuffer(*indices_buffer_);
     }
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
@@ -162,10 +163,10 @@ void glmMeshRenderer::render()
         vao_->bindCurrent();
         auto gl_mode = stDisplayModeDict[display_mode_];
         if(gl_mode == GL_POINT){
-            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertex_pts.size()));
+            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
         }else{
             glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->facets.indicesCount()), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->triangle_facets.size() * 3), GL_UNSIGNED_INT, 0);
         }
     }
     spdlog::info("Render called!");
