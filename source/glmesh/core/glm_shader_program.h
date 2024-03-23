@@ -46,6 +46,8 @@ public:
     int32_t getUniformLocation(const char* name)const;
     void setUniformMatrix4fv(int32_t location, const glm::mat4& mat)const;
     void setUniformMatrix4fv(const char* name, const glm::mat4& mat)const;
+    void setUniformVec4(const char* name, const glm::vec4& v)const;
+    void setUniformInt(const char* name, int v)const;
     uint32_t id()const{ return id_; }
     glmShaderProgram();
     ~glmShaderProgram();

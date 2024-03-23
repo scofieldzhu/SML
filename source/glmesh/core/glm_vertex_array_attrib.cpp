@@ -52,7 +52,7 @@ void glmVertexArrayAttrib::disable()
     glDisableVertexAttribArray(index_);
 }
 
-void glmVertexArrayAttrib::setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void *pointer)
+void glmVertexArrayAttrib::setPointer(int32_t size, uint32_t type, bool normalized, size_t stride, const void* pointer)
 {
     glVertexAttribPointer(index_, size, type, normalized, static_cast<GLsizei>(stride), pointer);
 }

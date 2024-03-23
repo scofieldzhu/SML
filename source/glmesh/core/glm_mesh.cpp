@@ -57,4 +57,14 @@ glm::vec3 glmMesh::calcCenterPoint() const
     return  center * (1.0f / vertices.size());
 }
 
+uint32_t glmMesh::calcVertexBufferByteSize() const
+{
+    return sizeof(VertexType) * static_cast<uint32_t>(vertices.size());
+}
+
+uint32_t glmMesh::calcColorBufferByteSize() const
+{
+    return sizeof(ColorType) * static_cast<uint32_t>(colors.size());
+}
+
 GLMESH_NAMESPACE_END

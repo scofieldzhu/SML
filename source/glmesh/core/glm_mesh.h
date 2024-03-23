@@ -38,13 +38,17 @@ GLMESH_NAMESPACE_BEGIN
 
 struct GLMESH_API glmMesh
 {
-    using VertexListType = std::vector<glm::vec3>;
-    using ColorListType = std::vector<glm::vec4>;
+    using VertexType = glm::vec3;
+    using VertexListType = std::vector<VertexType>;
+    using ColorType = glm::vec4;
+    using ColorListType = std::vector<ColorType>;
     using TriangleFacetType = glm::u32vec3;
     using TriangleFacetList = std::vector<TriangleFacetType>;
     bool valid()const{ return vertices.empty(); }
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
+    uint32_t calcVertexBufferByteSize()const; 
+    uint32_t calcColorBufferByteSize()const; 
     VertexListType vertices;
     ColorListType colors;
     TriangleFacetList triangle_facets;

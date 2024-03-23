@@ -46,7 +46,7 @@ GLMESH_NAMESPACE_BEGIN
 namespace{
   std::map<glmDisplayMode, GLuint> stDisplayModeDict = 
   {
-    {glmDisplayMode::kPoint, GL_POINT},
+    {glmDisplayMode::kPoint, GL_POINTS},
     {glmDisplayMode::kWire, GL_LINE},
     {glmDisplayMode::kFacet, GL_FILL}
   };
@@ -83,21 +83,32 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = std::make_shared<glmBuffer>(GL_ARRAY_BUFFER);
-    const uint32_t kTotalSize = sizeof(glm::vec3) * static_cast<uint32_t>(mesh_cloud->vertices.size());
-    buffer_->allocate(kTotalSize, mesh_cloud->vertices.data(), 0);
+    uint32_t vertice_byte_size = mesh_cloud->calcVertexBufferByteSize();
+    uint32_t color_byte_size = mesh_cloud->calcColorBufferByteSize();
+    buffer_->allocate(vertice_byte_size + color_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    buffer_->allocateSub(0, vertice_byte_size, mesh_cloud->vertices.data());
+    if(color_byte_size)
+        buffer_->allocateSub(vertice_byte_size, color_byte_size, mesh_cloud->colors.data());
 
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(*buffer_);
     if(!mesh_cloud->triangle_facets.empty()){
         indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
-        //auto indices_memory_block = mesh_cloud->facets.allocMemoryBlock();
         auto total_facets_byte_size = sizeof(glmMesh::TriangleFacetType) * mesh_cloud->triangle_facets.size();
         indices_buffer_->allocate(static_cast<uint32_t>(total_facets_byte_size), mesh_cloud->triangle_facets.data(), 0);
         vao_->bindBuffer(*indices_buffer_);
     }
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     vao_->getAttrib(0)->enable();
+    if(mesh_cloud->colors.empty()){
+        program_->setUniformInt("use_vcolor", 0);
+        program_->setUniformVec4("user_color", glm::vec4(1.0, 1.0, 0.0, 1.0));
+    }else{
+        program_->setUniformInt("use_vcolor", 1);        
+        vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vertice_byte_size));
+        vao_->getAttrib(1)->enable();
+    }
 }
 
 bool glmMeshRenderer::initialize(float width, float height)
@@ -162,7 +173,7 @@ void glmMeshRenderer::render()
     if(vao_){
         vao_->bindCurrent();
         auto gl_mode = stDisplayModeDict[display_mode_];
-        if(gl_mode == GL_POINT){
+        if(gl_mode == GL_POINTS){
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
         }else{
             glPolygonMode(GL_FRONT_AND_BACK, gl_mode);

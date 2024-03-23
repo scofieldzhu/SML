@@ -148,4 +148,14 @@ void glmShaderProgram::setUniformMatrix4fv(const char *name, const glm::mat4 &ma
     setUniformMatrix4fv(glGetUniformLocation(id_, name), mat);
 }
 
+void glmShaderProgram::setUniformVec4(const char* name, const glm::vec4& v) const
+{
+    glUniform4f(glGetUniformLocation(id_, name), v[0], v[1], v[2], v[3]);
+}
+
+void glmShaderProgram::setUniformInt(const char* name, int v) const
+{
+    glUniform1i(glGetUniformLocation(id_, name), v);
+}
+
 GLMESH_NAMESPACE_END
