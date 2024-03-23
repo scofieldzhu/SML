@@ -36,7 +36,7 @@
 
 namespace ply_reader
 {
-    bool LoadFile(const QString& file, glmesh::glmMesh& result_mesh);
+    bool LoadFile(const QString& file, glmesh::glmMesh& result_mesh, bool need_triangulate);
 };
 
 #endif

@@ -42,11 +42,13 @@ struct GLMESH_API glmMemoryBlock
     char* blockData(){ return block_data_; }
     auto size()const{ return size_; }
     explicit glmMemoryBlock(size_t s);
+    glmMemoryBlock(char* ptr, size_t s);
     ~glmMemoryBlock();
 
 private:
     char* block_data_ = nullptr;
-    size_t size_;
+    size_t size_ = 0;
+    bool allocted_ = false;
 };
 
 using glmMemoryBlockPtr = std::shared_ptr<glmMemoryBlock>;

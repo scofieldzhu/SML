@@ -37,12 +37,19 @@ glmMemoryBlock::glmMemoryBlock(size_t s)
     assert(s);
     block_data_ = new char[s]{0};
     size_ = s;
+    allocted_ = true;
+}
+
+glmMemoryBlock::glmMemoryBlock(char* ptr, size_t s)
+{
+    block_data_ = ptr;
+    size_ = s;
 }
 
 glmMemoryBlock::~glmMemoryBlock()
 {
-    delete[] block_data_;
-    size_ = 0;
+    if(allocted_)
+        delete[] block_data_;
 }
 
 GLMESH_NAMESPACE_END

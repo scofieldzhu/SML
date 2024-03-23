@@ -31,27 +31,37 @@
 #ifndef __glm_mesh_h__
 #define __glm_mesh_h__
 
-#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_memory_block.h"
 #include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
 struct GLMESH_API glmMesh
 {
+    using IndexType = uint32_t;
+    static constexpr size_t kIndexTypeSize = sizeof(IndexType);
+    static constexpr IndexType kPolyRestartIndex = 0xFFFFFFFF;    
     using VertexType = glm::vec3;
     using VertexListType = std::vector<VertexType>;
     using ColorType = glm::vec4;
     using ColorListType = std::vector<ColorType>;
     using TriangleFacetType = glm::u32vec3;
     using TriangleFacetList = std::vector<TriangleFacetType>;
+    using PolyFacetType = std::vector<IndexType>;
+    using PolyFacetListType = std::vector<PolyFacetType>;
     bool valid()const{ return vertices.empty(); }
+    glmMemoryBlockPtr allocMemoryOfFacets();
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
     uint32_t calcVertexBufferByteSize()const; 
     uint32_t calcColorBufferByteSize()const; 
+    uint32_t calcIndiceCount()const;
+    bool isTriangulated()const{ return !triangle_facets.empty(); }
+    bool existFacetData()const{ return triangle_facets.size() || poly_facets.size(); }
     VertexListType vertices;
     ColorListType colors;
     TriangleFacetList triangle_facets;
+    PolyFacetListType poly_facets;
 };
 
 GLMESH_NAMESPACE_END

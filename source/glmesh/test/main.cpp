@@ -45,7 +45,7 @@ void LoadMeshData()
 {
     QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
     glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
-    ply_reader::LoadFile(data_file, *mesh_cloud);
+    ply_reader::LoadFile(data_file, *mesh_cloud, false);
     stRenderWindow->loadMeshCloud(mesh_cloud);
 }
 

@@ -93,10 +93,10 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(*buffer_);
-    if(!mesh_cloud->triangle_facets.empty()){
+    if(mesh_cloud->existFacetData()){
         indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
-        auto total_facets_byte_size = sizeof(glmMesh::TriangleFacetType) * mesh_cloud->triangle_facets.size();
-        indices_buffer_->allocate(static_cast<uint32_t>(total_facets_byte_size), mesh_cloud->triangle_facets.data(), 0);
+        auto indices_data_mb = mesh_cloud->allocMemoryOfFacets();
+        indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
         vao_->bindBuffer(*indices_buffer_);
     }
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
@@ -177,7 +177,15 @@ void glmMeshRenderer::render()
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
         }else{
             glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->triangle_facets.size() * 3), GL_UNSIGNED_INT, 0);
+            if(cur_mesh_cloud_->existFacetData()){
+                if(cur_mesh_cloud_->isTriangulated()){
+                    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
+                }else{
+                    glEnable(GL_PRIMITIVE_RESTART);
+                    glPrimitiveRestartIndex(glmMesh::kPolyRestartIndex);
+                    glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
+                }
+            }
         }
     }
     spdlog::info("Render called!");

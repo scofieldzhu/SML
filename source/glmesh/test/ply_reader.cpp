@@ -38,7 +38,7 @@
 using namespace pcl;
 using namespace glmesh;
 
-bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
+bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh, bool need_triangulate)
 {
     pcl::PolygonMesh mesh;
     if (pcl::io::loadPLYFile(filename.toLocal8Bit().toStdString().c_str(), mesh) == -1) {
@@ -68,22 +68,32 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh)
             glm::vec4 clr = {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
             result_mesh.colors.push_back(std::move(clr));
         }
-    }
-    // triangulation!
-    result_mesh.triangle_facets.clear();
+    }        
     if(mesh.polygons.empty()){
         spdlog::warn("No facet data found in ply file:{}!", filename.toLocal8Bit().toStdString());
         return true;
     }
-    pcl::EarClipping ear_clipping;
-    ear_clipping.setInputMesh(std::make_shared<pcl::PolygonMesh>(mesh));
-    pcl::PolygonMesh output_mesh;
-    ear_clipping.process(output_mesh);
-    for(const auto& polygon : mesh.polygons){
-        assert(polygon.vertices.size() == 3);
-        result_mesh.triangle_facets.push_back(glmMesh::TriangleFacetType(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
+    if(!need_triangulate){   
+        result_mesh.poly_facets.clear();
+        for(const auto& polygon : mesh.polygons){
+            glmMesh::PolyFacetType pf;
+            for(auto idx : polygon.vertices)
+                pf.push_back(idx);
+            result_mesh.poly_facets.push_back(std::move(pf));
+        }
+    }else{
+        // triangulation!
+        result_mesh.triangle_facets.clear();
+        pcl::EarClipping ear_clipping;
+        ear_clipping.setInputMesh(std::make_shared<pcl::PolygonMesh>(mesh));
+        pcl::PolygonMesh output_mesh;
+        ear_clipping.process(output_mesh);
+        for(const auto& polygon : mesh.polygons){
+            assert(polygon.vertices.size() == 3);
+            result_mesh.triangle_facets.push_back(glmMesh::TriangleFacetType(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
+        }
     }
-    spdlog::info("Vertices count:{} Color count:{} Triangle facet count:{}!", result_mesh.vertices.size(), result_mesh.colors.size(), result_mesh.triangle_facets.size());
+    spdlog::info("Vertices count:{} Color count:{} Triangle facet count:{} polygon facet count:{}!", result_mesh.vertices.size(), result_mesh.colors.size(), result_mesh.triangle_facets.size(), result_mesh.poly_facets.size());
     SPDLOG_INFO("Read cloud file:{} successfully!", filename.toLocal8Bit().toStdString());        
     return true;
 }

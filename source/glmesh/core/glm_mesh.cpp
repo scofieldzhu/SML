@@ -29,6 +29,7 @@
  */
 
 #include "glm_mesh.h"
+#include <spdlog/spdlog.h>
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -65,6 +66,49 @@ uint32_t glmMesh::calcVertexBufferByteSize() const
 uint32_t glmMesh::calcColorBufferByteSize() const
 {
     return sizeof(ColorType) * static_cast<uint32_t>(colors.size());
+}
+
+uint32_t glmMesh::calcIndiceCount() const
+{
+    if(!triangle_facets.empty()){
+        return triangle_facets.size() * 3;
+    }
+    uint32_t count = 0;
+    if(!poly_facets.empty()){
+        for(const auto& pf : poly_facets)
+            count += (uint32_t)(pf.size());
+        count += poly_facets.size() - 1;
+    }
+    return count;
+}
+
+glmMemoryBlockPtr glmMesh::allocMemoryOfFacets()
+{
+    if(poly_facets.empty()){
+        if(triangle_facets.empty()){
+            spdlog::error("No facets data found!");
+            return nullptr;            
+        }
+        char* data_ptr = reinterpret_cast<char*>(triangle_facets.data());
+        size_t size = triangle_facets.size() * sizeof(TriangleFacetType);
+        return std::make_shared<glmMemoryBlock>(data_ptr, size);     
+    }
+    size_t total_size = 0;
+    for(auto pf : poly_facets)
+        total_size += pf.size() * kIndexTypeSize;
+    total_size += kIndexTypeSize * (poly_facets.size() - 1); //restart indexes size
+    auto data_block = std::make_shared<glmMemoryBlock>(total_size);
+    auto cur_data_ptr = reinterpret_cast<IndexType*>(data_block->blockData());
+    auto end_data_ptr = data_block->blockData() + total_size;
+    for(const auto& pf : poly_facets){
+        memcpy(cur_data_ptr, pf.data(), pf.size() * kIndexTypeSize);
+        cur_data_ptr += pf.size();
+        if((char*)cur_data_ptr != end_data_ptr){
+            *cur_data_ptr = kPolyRestartIndex;
+            ++cur_data_ptr;
+        }
+    }
+    return data_block;
 }
 
 GLMESH_NAMESPACE_END
