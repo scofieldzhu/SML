@@ -38,126 +38,126 @@
 
 using namespace glmesh;
 
-RenderWindow::RenderWindow(QApplication & app, QSurfaceFormat & format)
-    :WindowQt(app, format),
+#define AUTO_MAKE_CURRENT_CALL(CODE) { makeCurrent(); CODE; doneCurrent(); }
+
+RenderWindow::RenderWindow(QWidget* parent, Qt::WindowFlags f)
+    :QOpenGLWidget(parent, f),
     renderer_(std::make_shared<glmMeshRenderer>()),
-    handler_register_(std::make_unique<glmWinEventHandlerPublisher>()),
     trackball_(std::make_unique<glmTrackball>(renderer_))
 {
-    handler_register_->addHandler(trackball_.get());
-     renderer_->setDispalyMode(glmDisplayMode::kFacet);
+    addHandler(trackball_.get());
+    //renderer_->setDispalyMode(glmDisplayMode::kFacet);
+    setMouseTracking(true);
 }
 
 RenderWindow::~RenderWindow()
 {
+    clear();
     trackball_ = nullptr;
 }
 
 void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
 {
-    WindowQt::mouseReleaseEvent(event);
+    QOpenGLWidget::mouseReleaseEvent(event);
     spdlog::debug("mouseReleaseEvent:{}", (int)event->button());
 
-    makeCurrent();
     glmWinEvent target_event;
-    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
-    target_event.type = glmWinEvent::ET_RELEASE;
+    target_event.source = glmEventSource::kMouseDevice;
+    target_event.type = glmEventType::kRelease;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
-    handler_register_->publish(target_event);
-    updateGL();
-    doneCurrent();
+    publish(target_event);
+    update();
 }
 
 void RenderWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    WindowQt::mouseMoveEvent(event);
+    QOpenGLWidget::mouseMoveEvent(event);
     spdlog::debug("mouseMoveEvent:{}", (int)event->button());
 
-    makeCurrent();
     glmWinEvent target_event;
-    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
-    target_event.type = glmWinEvent::ET_MOVE;
+    target_event.source = glmEventSource::kMouseDevice;
+    target_event.type = glmEventType::kMove;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
-    handler_register_->publish(target_event);
-    updateGL();
-    doneCurrent();
+    publish(target_event);
+    update();
 }
 
 void RenderWindow::wheelEvent(QWheelEvent* event)
 {
-    WindowQt::wheelEvent(event);
+    QOpenGLWidget::wheelEvent(event);
     spdlog::debug("wheelEvent");
 
-    makeCurrent();
     glmWinEvent target_event;
-    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
-    target_event.type = glmWinEvent::ET_WHEEL_SCROLL;
-    target_event.event_button_id = glmWinEvent::MB_MIDDLE;
+    target_event.source = glmEventSource::kMouseDevice;
+    target_event.type = glmEventType::kWheelScroll;
+    target_event.event_button_id = (int)glmMouseButton::kMiddle;
     target_event.scroll_delta = event->angleDelta().y() / 120.0f;
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
-    handler_register_->publish(target_event);
-    updateGL();
-    doneCurrent();
+    publish(target_event);
+    update();
 }
 
 void RenderWindow::mousePressEvent(QMouseEvent* event)
 {
-    WindowQt::mousePressEvent(event);
+    QOpenGLWidget::mousePressEvent(event);
     spdlog::debug("mousePressEvent:{}", (int)event->button());
 
-    makeCurrent();
     glmWinEvent target_event;
-    target_event.source = glmWinEvent::ES_MOUSE_DEVICE;
-    target_event.type = glmWinEvent::ET_PRESSE;
+    target_event.source = glmEventSource::kMouseDevice;
+    target_event.type = glmEventType::kPress;
     target_event.event_button_id = event->button();
     target_event.pos = {event->pos().x(), event->pos().y()};
     target_event.extra_data = this;
-    handler_register_->publish(target_event);
-    updateGL();
-    doneCurrent();
+    publish(target_event);
+    update();
 }
 
-bool RenderWindow::initializeGL() 
+void RenderWindow::initializeGL() 
 {
-    return renderer_->initialize(width(), height());
+    AUTO_MAKE_CURRENT_CALL(renderer_->initialize(width(), height()))
 }
 
 void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
-    makeCurrent();
-    renderer_->loadMeshCloud(mesh_cloud);
-    updateGL();
-    doneCurrent();
+    AUTO_MAKE_CURRENT_CALL(renderer_->loadMeshCloud(mesh_cloud))
+    update();    
 }
 
-void RenderWindow::deinitializeGL() 
-{
-    renderer_->destroy();
-}
+// void RenderWindow::deinitializeGL() 
+// {
+//     renderer_->destroy();
+// }
 
-void RenderWindow::resizeGL(QResizeEvent* event) 
+//void RenderWindow::resizeGL(QResizeEvent* event) 
+void RenderWindow::resizeGL(int w, int h) 
 {
-    makeCurrent();
-    const auto& new_size = event->size();
-    renderer_->resize(new_size.width(), new_size.height());
-
+    const QSize& new_size = {w, h};
+    AUTO_MAKE_CURRENT_CALL(renderer_->resize(new_size.width(), new_size.height()))
+    
     glmWinEvent target_event;
-    target_event.source = glmWinEvent::ES_WIN;
-    target_event.type = glmWinEvent::ET_RESIZE;
+    target_event.source = glmEventSource::kWindow;
+    target_event.type = glmEventType::kResize;
     target_event.win_size = {(float)new_size.width(), (float)new_size.height()};
     target_event.extra_data = this;
-    handler_register_->publish(target_event);
-    updateGL();
+    publish(target_event);
+    update();
+}
+
+void RenderWindow::publish(const glmWinEvent& event)
+{
+    makeCurrent();
+    glmWinEventHandlerPublisher::publish(event);
     doneCurrent();
 }
 
 void RenderWindow::paintGL() 
 {
+    QOpenGLWidget::paintGL();
     renderer_->render();
 }
 
@@ -168,7 +168,7 @@ void RenderWindow::keyPressEvent(QKeyEvent * event)
         case Qt::Key_F5:
             // vertex_shader_source_->reload();
             // fragment_shader_source_->reload();
-            updateGL();
+            paintGL();
             break;
         case Qt::Key_Escape:
             qApp->quit();

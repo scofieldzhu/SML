@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_win_event.h 
+ *  File: main_window.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,51 +28,30 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_win_event_h__
-#define __glm_win_event_h__
+#include "main_window.h"
+#include <QBoxLayout>
 
-#include "glmesh/core/glm_base_type.h"
-
-GLMESH_NAMESPACE_BEGIN
-
-enum class glmMouseButton
+MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
+    :QMainWindow(nullptr, Qt::WindowFlags())
 {
-    kNone,
-    kLeft,
-    kRight,
-    kMiddle
-};
+    setMinimumSize(1024, 480);
+    setWindowTitle("3D mesh surface rendering control window");
+    ui.setupUi(this);
+    
+    ren_window = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
+    ren_window->setFormat(sf);
+    auto hbl = dynamic_cast<QHBoxLayout*>(ui.centralwidget->layout());
+    hbl->insertWidget(0, ren_window);
+    hbl->update();
 
-enum class glmEventSource
+    // QVBoxLayout* vbl = new QVBoxLayout();
+    // vbl->setContentsMargins(0, 0, 0, 0);
+    // vbl->setSpacing(0);
+    // vbl->addWidget(QWidget::createWindowContainer(ren_window, ui.renshellwidget));
+    // ui.renshellwidget->setLayout(vbl);
+    // ui.renshellwidget->update();
+}
+
+MainWindow::~MainWindow()
 {
-    kNull,
-    kMouseDevice,
-    kKeyboard,
-    kWindow
-};
-
-enum class glmEventType
-{
-    kNull,
-    kPress,
-    kDoublePress,
-    kRelease,
-    kMove,
-    kWheelScroll,
-    kResize
-};
-
-struct glmWinEvent
-{
-    glmEventSource source = glmEventSource::kNull;
-    glmEventType type = glmEventType::kNull;
-    int event_button_id = -1;
-    float scroll_delta = 0.0f;
-    glm::vec2 pos{0.0f, 0.0f};
-    glm::vec2 win_size{0.0f, 0.0f};
-    void* extra_data = nullptr;
-};
-
-GLMESH_NAMESPACE_END
-
-#endif
+}

@@ -38,17 +38,17 @@
 
 GLMESH_NAMESPACE_BEGIN
  
-class GLMESH_API glmWinEventHandlerPublisher final
+class GLMESH_API glmWinEventHandlerPublisher
 {
 public:
-    void publish(const glmWinEvent& event);
+    virtual void publish(const glmWinEvent& event);
     void addHandler(glmWinEventHandler* e);
     void removeHandler(glmWinEventHandler* e);
     void clear();
     glmWinEventHandlerPublisher();
-    ~glmWinEventHandlerPublisher();
+    virtual ~glmWinEventHandlerPublisher();
 
-private:
+protected:
     std::vector<glmWinEventHandler*> handlers_;
     std::mutex lock_;
 };

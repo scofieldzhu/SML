@@ -117,29 +117,29 @@ void glmTrackball::handleLeftButtonReleased(const glmWinEvent& event)
 void glmTrackball::handleMouseEvent(const glmWinEvent& event)
 {
     switch(event.event_button_id){
-        case glmWinEvent::MB_LEFT:
-            if(event.type == glmWinEvent::ET_PRESSE){
+        case (int)glmMouseButton::kLeft:
+            if(event.type == glmEventType::kPress){
                 handleLeftButtonPressed(event);
                 break;
             }
-            if(event.type == glmWinEvent::ET_RELEASE){
+            if(event.type == glmEventType::kRelease){
                 handleLeftButtonReleased(event);
                 break;
             }
             break;
 
-        case glmWinEvent::MB_MIDDLE:
-            if(event.type == glmWinEvent::ET_WHEEL_SCROLL){
+        case (int)glmMouseButton::kMiddle:
+            if(event.type == glmEventType::kWheelScroll){
                 handleWheelScroll(event);
                 break;
             }
             break;
 
-        case glmWinEvent::MB_RIGHT:
+        case (int)glmMouseButton::kRight:
             break;
 
-        case glmWinEvent::MB_NULL:
-            if(event.type == glmWinEvent::ET_MOVE){
+        case (int)glmMouseButton::kNone:
+            if(event.type == glmEventType::kMove){
                 handleMouseMove(event);
                 break;
             }
@@ -164,7 +164,7 @@ void glmTrackball::handleWheelScroll(const glmWinEvent& event)
 
 void glmTrackball::handleWindowEvent(const glmWinEvent& event)
 {
-    if(event.type == glmWinEvent::ET_RESIZE){
+    if(event.type == glmEventType::kResize){
         handleResize(event);
         return;
     }
@@ -178,15 +178,15 @@ void glmTrackball::handleResize(const glmWinEvent& event)
 
 void glmTrackball::handleEvent(const glmWinEvent& event)
 {
-    if(event.source == glmWinEvent::ES_MOUSE_DEVICE){
+    if(event.source == glmEventSource::kMouseDevice){
         handleMouseEvent(event);
         return;
     }
-    if(event.source == glmWinEvent::ES_KEYBOARD){
+    if(event.source == glmEventSource::kKeyboard){
         handleKeyboardEvent(event);
         return;
     }
-    if(event.source == glmWinEvent::ES_WIN){
+    if(event.source == glmEventSource::kWindow){
         handleWindowEvent(event);
         return;
     }

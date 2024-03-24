@@ -23,14 +23,16 @@ else()
     message(STATUS "${target}")
 endif()
 
-file(GLOB SOURCE_FILES 
-    "*.h"
-    "*.hpp"
-    "*.cpp"
-    "*.c"
-    "*.vert"
-    "*.fraq"
-    )
+set(SOURCE_FILES
+    "main_window.h"
+    "main_window.cpp"
+    "main.cpp"
+    "mainwindow.ui"
+    "ply_reader.h"
+    "ply_reader.cpp"
+    "render_window.h"
+    "render_window.cpp"
+)
 
 # Build executable
 add_executable(${target}
