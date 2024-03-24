@@ -44,6 +44,68 @@
         <height>0</height>
        </size>
       </property>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>211</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Mesh Info</string>
+       </property>
+       <widget class="QLabel" name="mesh_info_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>181</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>190</y>
+         <width>211</width>
+         <height>201</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Key Binding</string>
+       </property>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>53</width>
+          <height>15</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rotate:</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="rotate_key_cb">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>30</y>
+          <width>121</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>

@@ -34,6 +34,7 @@
 #include <spdlog/spdlog.h>
 #include <glmesh/core/glm_mesh.h>
 #include <glmesh/core/glm_mesh_renderer.h>
+#include <glmesh/core/glm_trackball.h>
 #include "ply_reader.h"
 
 MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
@@ -48,6 +49,12 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     auto hbl = dynamic_cast<QHBoxLayout*>(ui.centralwidget->layout());
     hbl->insertWidget(0, ren_window_);
     hbl->update();
+    ui.rotate_key_cb->addItem("No Button");
+    ui.rotate_key_cb->addItem("Left Button");
+    ui.rotate_key_cb->addItem("Right Button");
+    ui.rotate_key_cb->addItem("Middle Button");
+    ui.rotate_key_cb->setCurrentIndex(0);
+    connect(ui.rotate_key_cb, SIGNAL(currentIndexChanged(int)), this, SLOT(onRotationButtonChanged(int)));
 
     connect(ui.actionLoad_Mesh_Data, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_LoadMeshData(bool)));
     ui.actionDM_Points->setChecked(true);
@@ -58,6 +65,11 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::onRotationButtonChanged(int index)
+{
+    ren_window_->trackball()->bindRotationToMouseButton(static_cast<glmesh::glmMouseButton>(index));
 }
 
 void MainWindow::onMenuItemSlot_DM_Points(bool checked)
@@ -102,4 +114,11 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
     glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
     ply_reader::LoadFile(file_name, *mesh_cloud, false);
     ren_window_->loadMeshCloud(mesh_cloud);
+
+    //update mesh information label
+    ui.mesh_info_label->setText(QString(" Vertex count: %1 \n Color count: %2 \n Triangle facet count: %3 \n Polygon facet count:%4")
+        .arg(mesh_cloud->vertices.size())
+        .arg(mesh_cloud->colors.size())
+        .arg(mesh_cloud->triangle_facets.size())
+        .arg(mesh_cloud->poly_facets.size()));
 }

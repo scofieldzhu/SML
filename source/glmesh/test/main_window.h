@@ -45,6 +45,7 @@ public:
     Ui::MainWindow ui;
 
 private slots:
+    void onRotationButtonChanged(int index);
     void onMenuItemSlot_LoadMeshData(bool checked = false);
     void onMenuItemSlot_DM_Points(bool checked = false);
     void onMenuItemSlot_DM_Wire(bool checked = false);

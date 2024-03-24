@@ -40,6 +40,7 @@ GLMESH_NAMESPACE_BEGIN
 class GLMESH_API glmTrackball : public glmWinEventHandler
 {
 public:
+    void bindRotationToMouseButton(glmMouseButton button);
     void handleEvent(const glmWinEvent& event) override;
     glmTrackball(glmMeshRendererPtr ren);
     ~glmTrackball();
@@ -47,23 +48,18 @@ public:
 private:
     glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
     glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
-    void handleLeftButtonPressed(const glmWinEvent& event);
-    void handleLeftButtonReleased(const glmWinEvent& event);
-    void handleRightButtonPressed(const glmWinEvent& event);
-    void handleRightButtonReleased(const glmWinEvent& event);
-    void handleMiddleButtoPressed(const glmWinEvent& event);
-    void handleMiddleButtoReleased(const glmWinEvent& event);
     void handleMouseMove(const glmWinEvent& event);
     void handleMouseEvent(const glmWinEvent& event);
     void handleKeyboardEvent(const glmWinEvent& event);
     void handleWheelScroll(const glmWinEvent& event);
     void handleWindowEvent(const glmWinEvent& event);
     void handleResize(const glmWinEvent& event);
-    bool left_button_pressed_ = false;
     float width_ = 0.0f;
     float height_ = 0.0f;
-    glm::vec2 last_mouse_pos_;
+    glm::vec2 tracking_mouse_pos_;
     glmMeshRendererPtr renderer_;
+    glmMouseButton rotation_button_ = glmMouseButton::kNone;
+    glmMouseButton current_pressed_button_ = glmMouseButton::kNone;
 };
 
 GLMESH_NAMESPACE_END

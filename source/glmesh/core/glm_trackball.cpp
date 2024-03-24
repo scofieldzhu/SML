@@ -68,74 +68,33 @@ glm::vec3 glmTrackball::mapToSphere(const glm::vec2& win_pos) const
     }
 }
 
-void glmTrackball::handleLeftButtonPressed(const glmWinEvent& event)
-{
-    left_button_pressed_ = true;
-    last_mouse_pos_ = event.pos;
-    //spdlog::debug("handleLeftButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-}
-
-void glmTrackball::handleMiddleButtoReleased(const glmWinEvent& event)
-{
-    //spdlog::debug("handleMiddleButtoReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-}
-
 void glmTrackball::handleMouseMove(const glmWinEvent& event)
 {
     //spdlog::debug("handleMouseMove! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-    if(left_button_pressed_){
+    if(rotation_button_ != glmMouseButton::kNone && current_pressed_button_ == rotation_button_){
         glm::vec2 now_pos = event.pos;
-        auto quad = rotate(last_mouse_pos_, now_pos);
+        auto quad = rotate(tracking_mouse_pos_, now_pos);
         auto mat = renderer_->modelMat();
         mat = mat * glm::toMat4(quad);
         renderer_->setModelMat(mat);
-        last_mouse_pos_ = now_pos;
+        tracking_mouse_pos_ = now_pos;
     }
-}
-
-void glmTrackball::handleMiddleButtoPressed(const glmWinEvent& event)
-{
-    //spdlog::debug("handleMiddleButtoPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-}
-
-void glmTrackball::handleRightButtonReleased(const glmWinEvent& event)
-{
-    //spdlog::debug("handleRightButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-}
-
-void glmTrackball::handleRightButtonPressed(const glmWinEvent& event)
-{
-    //spdlog::debug("handleRightButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
-}
-
-void glmTrackball::handleLeftButtonReleased(const glmWinEvent& event)
-{
-    left_button_pressed_ = false;
-    //spdlog::debug("handleLeftButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleMouseEvent(const glmWinEvent& event)
 {
+    if(event.type == glmEventType::kPress){
+        current_pressed_button_ = (glmMouseButton)event.event_button_id;
+        tracking_mouse_pos_ = event.pos;
+    }else if(event.type == glmEventType::kRelease){
+        current_pressed_button_ = glmMouseButton::kNone;
+    }
     switch(event.event_button_id){
-        case (int)glmMouseButton::kLeft:
-            if(event.type == glmEventType::kPress){
-                handleLeftButtonPressed(event);
-                break;
-            }
-            if(event.type == glmEventType::kRelease){
-                handleLeftButtonReleased(event);
-                break;
-            }
-            break;
-
         case (int)glmMouseButton::kMiddle:
             if(event.type == glmEventType::kWheelScroll){
                 handleWheelScroll(event);
                 break;
             }
-            break;
-
-        case (int)glmMouseButton::kRight:
             break;
 
         case (int)glmMouseButton::kNone:
@@ -176,7 +135,12 @@ void glmTrackball::handleResize(const glmWinEvent& event)
     height_ = event.win_size.y;
 }
 
-void glmTrackball::handleEvent(const glmWinEvent& event)
+void glmTrackball::bindRotationToMouseButton(glmMouseButton button)
+{
+    rotation_button_ = button;
+}
+
+void glmTrackball::handleEvent(const glmWinEvent &event)
 {
     if(event.source == glmEventSource::kMouseDevice){
         handleMouseEvent(event);

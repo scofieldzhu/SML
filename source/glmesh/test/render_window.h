@@ -41,7 +41,8 @@ public:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void publish(const glmesh::glmWinEvent& event) override;
-    auto renderer()const { return renderer_; }
+    auto renderer()const { return renderer_.get(); }
+    auto trackball()const { return trackball_.get(); }
     bool existMeshData()const;
     void loadMeshCloud(glmesh::glmMeshPtr mesh_cloud);
     //void deinitializeGL() override;
