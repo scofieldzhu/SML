@@ -11,6 +11,7 @@ set(EXPORT_HEAD_FILES
     "glm_base_type.h"
     "glm_buffer.h"
     "glm_memory_block.h"
+    "glm_object.h"
     "glm_mesh.h"
     "glm_mesh_renderer.h"
     "glm_shader_program.h"

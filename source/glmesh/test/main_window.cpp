@@ -31,6 +31,7 @@
 #include "main_window.h"
 #include <QBoxLayout>
 #include <QFileDialog>
+#include <QColorDialog>
 #include <spdlog/spdlog.h>
 #include <glmesh/core/glm_mesh.h>
 #include <glmesh/core/glm_mesh_renderer.h>
@@ -61,6 +62,7 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     connect(ui.actionDM_Points, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Points(bool)));
     connect(ui.actionDM_Wire, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Wire(bool)));
     connect(ui.actionDM_Facet, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Facet(bool)));
+    connect(ui.actionChange_Color, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_ChangeColor(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +72,17 @@ MainWindow::~MainWindow()
 void MainWindow::onRotationButtonChanged(int index)
 {
     ren_window_->trackball()->bindRotationToMouseButton(static_cast<glmesh::glmMouseButton>(index));
+}
+
+void MainWindow::onMenuItemSlot_ChangeColor(bool checked)
+{
+    if(!ren_window_->existMeshData())
+        return;
+    QColor color = QColorDialog::getColor(Qt::red, this, "Please choose a color");
+    if(color.isValid()){
+        ren_window_->renderer()->setUserColor(glm::vec4(color.redF(), color.greenF(), color.blueF(), 1.0f));
+        ren_window_->update();
+    }
 }
 
 void MainWindow::onMenuItemSlot_DM_Points(bool checked)

@@ -87,7 +87,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = nullptr; //release old buffer
-    buffer_ = std::make_shared<glmBuffer>(GL_ARRAY_BUFFER);
+    buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
     uint32_t vertice_byte_size = mesh_cloud->calcVertexBufferByteSize();
     uint32_t color_byte_size = mesh_cloud->calcColorBufferByteSize();
     buffer_->allocate(vertice_byte_size + color_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -100,7 +100,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     vao_->bindBuffer(*buffer_);
     if(mesh_cloud->existFacetData()){
         indices_buffer_ = nullptr; //release old indices buffer
-        indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
+        indices_buffer_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
         auto indices_data_mb = mesh_cloud->allocMemoryOfFacets();
         indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
         vao_->bindBuffer(*indices_buffer_);
@@ -109,12 +109,19 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     vao_->getAttrib(0)->enable();
     if(mesh_cloud->colors.empty()){
         program_->setUniformInt("use_vcolor", 0);
-        program_->setUniformVec4("user_color", glm::vec4(1.0, 1.0, 0.0, 1.0));
+        program_->setUniformVec4("user_color", user_color_);
     }else{
         program_->setUniformInt("use_vcolor", 1);        
         vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vertice_byte_size));
         vao_->getAttrib(1)->enable();
     }
+}
+
+void glmMeshRenderer::setUserColor(const glm::vec4 &color)
+{
+    user_color_ = color;
+    program_->use();
+    program_->setUniformVec4("user_color", user_color_);
 }
 
 bool glmMeshRenderer::initialize(float width, float height)

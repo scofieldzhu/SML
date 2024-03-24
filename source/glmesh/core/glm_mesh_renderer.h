@@ -34,14 +34,16 @@
 #include <glm/gtx/quaternion.hpp>
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_object.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmMeshRenderer
+class GLMESH_API glmMeshRenderer : public glmObject<glmMeshRenderer>
 {
 public:
     auto currentMeshCloud()const{ return cur_mesh_cloud_; }
     void loadMeshCloud(glmMeshPtr mesh_cloud);
+    void setUserColor(const glm::vec4& color);
     bool initialize(float width, float height);
     void destroy();
     void resize(float width, float height);
@@ -59,6 +61,7 @@ public:
 
 private:
     glm::vec2 render_size_;
+    glm::vec4 user_color_ = glm::vec4(1.0, 1.0, 0.0, 1.0);
     glmMeshPtr cur_mesh_cloud_;
     glmBufferPtr buffer_;
     glmBufferPtr indices_buffer_;

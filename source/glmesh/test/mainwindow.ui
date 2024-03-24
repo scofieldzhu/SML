@@ -138,6 +138,7 @@
      <addaction name="actionDM_Facet"/>
     </widget>
     <addaction name="menuDisplay_Mode"/>
+    <addaction name="actionChange_Color"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDisplay"/>
@@ -170,6 +171,11 @@
    </property>
    <property name="text">
     <string>Facet</string>
+   </property>
+  </action>
+  <action name="actionChange_Color">
+   <property name="text">
+    <string>Change Color</string>
    </property>
   </action>
  </widget>

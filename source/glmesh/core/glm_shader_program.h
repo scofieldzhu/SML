@@ -33,10 +33,11 @@
 
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_object.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmShaderProgram
+class GLMESH_API glmShaderProgram : public glmObject<glmShaderProgram>
 {
 public:
     uint32_t addShaderSource(const char* source, uint32_t shader_type);

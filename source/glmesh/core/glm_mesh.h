@@ -33,10 +33,11 @@
 
 #include "glmesh/core/glm_memory_block.h"
 #include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_object.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-struct GLMESH_API glmMesh
+struct GLMESH_API glmMesh : public glmObject<glmMesh>
 {
     using IndexType = uint32_t;
     static constexpr size_t kIndexTypeSize = sizeof(IndexType);

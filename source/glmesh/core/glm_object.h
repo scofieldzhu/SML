@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_vertex_array.h 
+ *  File: glm_object.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,33 +28,23 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_vertex_array_h__
-#define __glm_vertex_array_h__
+#ifndef __glm_object_h__
+#define __glm_object_h__
 
-#include <map>
-#include "glmesh/core/glm_vertex_array_attrib.h"
-#include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include <memory>
+#include "glmesh/core/glm_nsp.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmVertexArray : public glmObject<glmVertexArray>
+template <class D>
+class glmObject
 {
-public:
-    void bindCurrent();
-    void bindBuffer(const glmBuffer& buffer);
-    void unbindBuffer(const glmBuffer& buffer);
-    uint32_t id()const{ return id_; }
-    glmVertexArrayAttrib* getAttrib(uint32_t index);
-    glmVertexArray& operator=(const glmVertexArray&) = delete;
-    glmVertexArray();
-    glmVertexArray(const glmVertexArray&) = delete;
-    ~glmVertexArray();
-
-private:
-    uint32_t id_ = 0;
-    using AttribUPtr = std::unique_ptr<glmVertexArrayAttrib>;
-    std::map<uint32_t, AttribUPtr> attrib_map_;
+public: 
+    template <typename... Args>
+    static std::shared_ptr<D> New(Args&&... args)
+    {
+        return std::make_shared<D>(std::forward<Args>(args)...);
+    }
 };
 
 GLMESH_NAMESPACE_END

@@ -33,10 +33,11 @@
 
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_object.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmBuffer
+class GLMESH_API glmBuffer : public glmObject<glmBuffer>
 {
 public:
     auto type()const{ return type_; }

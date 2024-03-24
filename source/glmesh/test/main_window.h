@@ -50,6 +50,7 @@ private slots:
     void onMenuItemSlot_DM_Points(bool checked = false);
     void onMenuItemSlot_DM_Wire(bool checked = false);
     void onMenuItemSlot_DM_Facet(bool checked = false);
+    void onMenuItemSlot_ChangeColor(bool checked = false);
 
 private:
     RenderWindow* ren_window_ = nullptr; 
