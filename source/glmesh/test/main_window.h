@@ -39,10 +39,20 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
+    auto renderWindow(){ return ren_window_; }
     MainWindow(QApplication& app, QSurfaceFormat& sf);
     ~MainWindow();
     Ui::MainWindow ui;
-    RenderWindow* ren_window = nullptr; 
+
+private slots:
+    void onMenuItemSlot_LoadMeshData(bool checked = false);
+    void onMenuItemSlot_DM_Points(bool checked = false);
+    void onMenuItemSlot_DM_Wire(bool checked = false);
+    void onMenuItemSlot_DM_Facet(bool checked = false);
+
+private:
+    RenderWindow* ren_window_ = nullptr; 
+    QString last_mesh_dir_;
 };
 
 #endif

@@ -29,26 +29,22 @@
  */
 
 #include <QApplication>
-#include <QMainWindow>
-#include <QSurfaceFormat>
-#include <QTimer>
 #include <QThread>
+#include <memory>
+#include <QSurfaceFormat>
 #include <spdlog/spdlog.h>
-#include "render_window.h"
-#include "ply_reader.h"
-#include "glmesh/core/glm_mesh.h"
 #include "main_window.h"
 using namespace glmesh;
 
-MainWindow* gMainWindow = nullptr;
+// MainWindow* gMainWindow = nullptr;
 
-void LoadMeshData()
-{
-    QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
-    glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
-    ply_reader::LoadFile(data_file, *mesh_cloud, false);
-    gMainWindow->ren_window->loadMeshCloud(mesh_cloud);
-}
+// void LoadMeshData()
+// {
+//     QString data_file = QCoreApplication::applicationDirPath() + "/Axle shaft.ply";
+//     glmMeshPtr mesh_cloud = std::make_shared<glmMesh>();
+//     ply_reader::LoadFile(data_file, *mesh_cloud, false);
+//     gMainWindow->ren_window->loadMeshCloud(mesh_cloud);
+// }
 
 int main(int argc, char * argv[])
 {
@@ -68,17 +64,11 @@ int main(int argc, char * argv[])
 #endif
     format.setDepthBufferSize(16);
 
-    // QMainWindow window;
-    // window.setMinimumSize(640, 480);
-    // window.setWindowTitle("globjects and Qt");
-    // stRenderWindow = new RenderWindow(app, format);
-    // window.setCentralWidget(QWidget::createWindowContainer(stRenderWindow, &window));
+    std::unique_ptr<MainWindow> main_win = std::make_unique<MainWindow>(app, format);
 
-    gMainWindow = new MainWindow(app, format);
+    //QTimer::singleShot(2000, LoadMeshData);
 
-    QTimer::singleShot(2000, LoadMeshData);
-
-    gMainWindow->show();
+    main_win->show();
 
     return app.exec();
 }

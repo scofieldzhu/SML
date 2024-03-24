@@ -30,6 +30,11 @@
 
 #include "main_window.h"
 #include <QBoxLayout>
+#include <QFileDialog>
+#include <spdlog/spdlog.h>
+#include <glmesh/core/glm_mesh.h>
+#include <glmesh/core/glm_mesh_renderer.h>
+#include "ply_reader.h"
 
 MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     :QMainWindow(nullptr, Qt::WindowFlags())
@@ -38,20 +43,63 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     setWindowTitle("3D mesh surface rendering control window");
     ui.setupUi(this);
     
-    ren_window = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
-    ren_window->setFormat(sf);
+    ren_window_ = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
+    ren_window_->setFormat(sf);
     auto hbl = dynamic_cast<QHBoxLayout*>(ui.centralwidget->layout());
-    hbl->insertWidget(0, ren_window);
+    hbl->insertWidget(0, ren_window_);
     hbl->update();
 
-    // QVBoxLayout* vbl = new QVBoxLayout();
-    // vbl->setContentsMargins(0, 0, 0, 0);
-    // vbl->setSpacing(0);
-    // vbl->addWidget(QWidget::createWindowContainer(ren_window, ui.renshellwidget));
-    // ui.renshellwidget->setLayout(vbl);
-    // ui.renshellwidget->update();
+    connect(ui.actionLoad_Mesh_Data, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_LoadMeshData(bool)));
+    ui.actionDM_Points->setChecked(true);
+    connect(ui.actionDM_Points, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Points(bool)));
+    connect(ui.actionDM_Wire, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Wire(bool)));
+    connect(ui.actionDM_Facet, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Facet(bool)));
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::onMenuItemSlot_DM_Points(bool checked)
+{
+    if(ren_window_->existMeshData()){
+        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kPoint);
+        ui.actionDM_Points->setChecked(true);
+        ui.actionDM_Wire->setChecked(false);
+        ui.actionDM_Facet->setChecked(false);
+    }
+}
+
+void MainWindow::onMenuItemSlot_DM_Facet(bool checked)
+{
+    if(ren_window_->existMeshData()){
+        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kFacet);
+        ui.actionDM_Facet->setChecked(true);
+        ui.actionDM_Wire->setChecked(false);
+        ui.actionDM_Points->setChecked(false);
+    }
+}
+
+void MainWindow::onMenuItemSlot_DM_Wire(bool checked)
+{    
+    if(ren_window_->existMeshData()){
+        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kWire);
+        ui.actionDM_Wire->setChecked(true);
+        ui.actionDM_Facet->setChecked(false);
+        ui.actionDM_Points->setChecked(false);
+    }
+}
+
+void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
+{
+    spdlog::info("Load mesh data");
+
+    QString file_name = QFileDialog::getOpenFileName(this, "Open file", last_mesh_dir_.isEmpty() ? QCoreApplication::applicationDirPath() : last_mesh_dir_, "PLY files (*.ply)");
+    if(file_name.isEmpty()){
+        return; // user cancel
+    }
+    last_mesh_dir_ = QFileInfo(file_name).absoluteDir().absolutePath();
+    glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
+    ply_reader::LoadFile(file_name, *mesh_cloud, false);
+    ren_window_->loadMeshCloud(mesh_cloud);
 }

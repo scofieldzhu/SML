@@ -53,6 +53,11 @@ void glmVertexArray::bindBuffer(const glmBuffer& buffer)
     glBindBuffer(buffer.type(), buffer.id());
 }
 
+void glmVertexArray::unbindBuffer(const glmBuffer &buffer)
+{
+    glBindBuffer(buffer.type(), 0);
+}
+
 glmVertexArrayAttrib* glmVertexArray::getAttrib(uint32_t index)
 {
     auto it = attrib_map_.find(index);

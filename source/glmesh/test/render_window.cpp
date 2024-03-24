@@ -46,7 +46,6 @@ RenderWindow::RenderWindow(QWidget* parent, Qt::WindowFlags f)
     trackball_(std::make_unique<glmTrackball>(renderer_))
 {
     addHandler(trackball_.get());
-    //renderer_->setDispalyMode(glmDisplayMode::kFacet);
     setMouseTracking(true);
 }
 
@@ -59,7 +58,7 @@ RenderWindow::~RenderWindow()
 void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
 {
     QOpenGLWidget::mouseReleaseEvent(event);
-    spdlog::debug("mouseReleaseEvent:{}", (int)event->button());
+    //spdlog::debug("mouseReleaseEvent:{}", (int)event->button());
 
     glmWinEvent target_event;
     target_event.source = glmEventSource::kMouseDevice;
@@ -74,7 +73,7 @@ void RenderWindow::mouseReleaseEvent(QMouseEvent* event)
 void RenderWindow::mouseMoveEvent(QMouseEvent* event)
 {
     QOpenGLWidget::mouseMoveEvent(event);
-    spdlog::debug("mouseMoveEvent:{}", (int)event->button());
+    //spdlog::debug("mouseMoveEvent:{}", (int)event->button());
 
     glmWinEvent target_event;
     target_event.source = glmEventSource::kMouseDevice;
@@ -89,7 +88,7 @@ void RenderWindow::mouseMoveEvent(QMouseEvent* event)
 void RenderWindow::wheelEvent(QWheelEvent* event)
 {
     QOpenGLWidget::wheelEvent(event);
-    spdlog::debug("wheelEvent");
+    //spdlog::debug("wheelEvent");
 
     glmWinEvent target_event;
     target_event.source = glmEventSource::kMouseDevice;
@@ -105,7 +104,7 @@ void RenderWindow::wheelEvent(QWheelEvent* event)
 void RenderWindow::mousePressEvent(QMouseEvent* event)
 {
     QOpenGLWidget::mousePressEvent(event);
-    spdlog::debug("mousePressEvent:{}", (int)event->button());
+    //spdlog::debug("mousePressEvent:{}", (int)event->button());
 
     glmWinEvent target_event;
     target_event.source = glmEventSource::kMouseDevice;
@@ -133,7 +132,6 @@ void RenderWindow::loadMeshCloud(glmMeshPtr mesh_cloud)
 //     renderer_->destroy();
 // }
 
-//void RenderWindow::resizeGL(QResizeEvent* event) 
 void RenderWindow::resizeGL(int w, int h) 
 {
     const QSize& new_size = {w, h};
@@ -155,13 +153,18 @@ void RenderWindow::publish(const glmWinEvent& event)
     doneCurrent();
 }
 
+bool RenderWindow::existMeshData() const
+{
+    return renderer_ && renderer_->currentMeshCloud();
+}
+
 void RenderWindow::paintGL() 
 {
     QOpenGLWidget::paintGL();
     renderer_->render();
 }
 
-void RenderWindow::keyPressEvent(QKeyEvent * event) 
+void RenderWindow::keyPressEvent(QKeyEvent* event) 
 {
     makeCurrent();
     switch (event->key()){

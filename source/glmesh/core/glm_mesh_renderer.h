@@ -40,6 +40,7 @@ GLMESH_NAMESPACE_BEGIN
 class GLMESH_API glmMeshRenderer
 {
 public:
+    auto currentMeshCloud()const{ return cur_mesh_cloud_; }
     void loadMeshCloud(glmMeshPtr mesh_cloud);
     bool initialize(float width, float height);
     void destroy();
@@ -51,6 +52,7 @@ public:
     void setCameraFovy(float fovy);
     void setDispalyMode(glmDisplayMode m);
     auto displayMode()const;
+    void resetView();
     void render();
     glmMeshRenderer();
     ~glmMeshRenderer();

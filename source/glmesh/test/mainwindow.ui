@@ -44,9 +44,6 @@
         <height>0</height>
        </size>
       </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 85, 255);</string>
-      </property>
      </widget>
     </item>
    </layout>
@@ -70,7 +67,15 @@
     <property name="title">
      <string>Display</string>
     </property>
-    <addaction name="actionDisplay_Mode"/>
+    <widget class="QMenu" name="menuDisplay_Mode">
+     <property name="title">
+      <string>Display Mode</string>
+     </property>
+     <addaction name="actionDM_Points"/>
+     <addaction name="actionDM_Wire"/>
+     <addaction name="actionDM_Facet"/>
+    </widget>
+    <addaction name="menuDisplay_Mode"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDisplay"/>
@@ -81,9 +86,28 @@
     <string>Load Mesh Data</string>
    </property>
   </action>
-  <action name="actionDisplay_Mode">
+  <action name="actionDM_Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Display Mode</string>
+    <string>Points</string>
+   </property>
+  </action>
+  <action name="actionDM_Wire">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Wire</string>
+   </property>
+  </action>
+  <action name="actionDM_Facet">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Facet</string>
    </property>
   </action>
  </widget>

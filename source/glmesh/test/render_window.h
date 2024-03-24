@@ -41,15 +41,12 @@ public:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void publish(const glmesh::glmWinEvent& event) override;
-    //virtual void paintGL();
-
-    //bool initializeGL() override;
+    auto renderer()const { return renderer_; }
+    bool existMeshData()const;
     void loadMeshCloud(glmesh::glmMeshPtr mesh_cloud);
     //void deinitializeGL() override;
-    //void resizeGL(QResizeEvent* event) override;
     void paintGL() override;    
     void keyPressEvent(QKeyEvent* event) override;    
-    //RenderWindow(QApplication& app, QSurfaceFormat& format);
     RenderWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~RenderWindow();
 

@@ -72,17 +72,17 @@ void glmTrackball::handleLeftButtonPressed(const glmWinEvent& event)
 {
     left_button_pressed_ = true;
     last_mouse_pos_ = event.pos;
-    spdlog::debug("handleLeftButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleLeftButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleMiddleButtoReleased(const glmWinEvent& event)
 {
-    spdlog::debug("handleMiddleButtoReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleMiddleButtoReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleMouseMove(const glmWinEvent& event)
 {
-    spdlog::debug("handleMouseMove! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleMouseMove! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
     if(left_button_pressed_){
         glm::vec2 now_pos = event.pos;
         auto quad = rotate(last_mouse_pos_, now_pos);
@@ -95,23 +95,23 @@ void glmTrackball::handleMouseMove(const glmWinEvent& event)
 
 void glmTrackball::handleMiddleButtoPressed(const glmWinEvent& event)
 {
-    spdlog::debug("handleMiddleButtoPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleMiddleButtoPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleRightButtonReleased(const glmWinEvent& event)
 {
-    spdlog::debug("handleRightButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleRightButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleRightButtonPressed(const glmWinEvent& event)
 {
-    spdlog::debug("handleRightButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleRightButtonPressed! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleLeftButtonReleased(const glmWinEvent& event)
 {
     left_button_pressed_ = false;
-    spdlog::debug("handleLeftButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
+    //spdlog::debug("handleLeftButtonReleased! mouse_pos:[{}, {}].", event.pos.x, event.pos.y);
 }
 
 void glmTrackball::handleMouseEvent(const glmWinEvent& event)

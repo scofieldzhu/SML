@@ -63,6 +63,10 @@ glmMeshRenderer::~glmMeshRenderer()
 
 void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
+    if(mesh_cloud.get() == cur_mesh_cloud_.get()){
+        spdlog::warn("The same mesh cloud has been loaded!");
+        return;
+    }
     cur_mesh_cloud_ = mesh_cloud;
     if(mesh_cloud->valid()){
         spdlog::warn("Mesh cloud contain a empty vertex list!");
@@ -82,6 +86,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 
+    buffer_ = nullptr; //release old buffer
     buffer_ = std::make_shared<glmBuffer>(GL_ARRAY_BUFFER);
     uint32_t vertice_byte_size = mesh_cloud->calcVertexBufferByteSize();
     uint32_t color_byte_size = mesh_cloud->calcColorBufferByteSize();
@@ -89,11 +94,12 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     buffer_->allocateSub(0, vertice_byte_size, mesh_cloud->vertices.data());
     if(color_byte_size)
         buffer_->allocateSub(vertice_byte_size, color_byte_size, mesh_cloud->colors.data());
-
+    vao_ = nullptr; //release old vao
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(*buffer_);
     if(mesh_cloud->existFacetData()){
+        indices_buffer_ = nullptr; //release old indices buffer
         indices_buffer_ = std::make_shared<glmBuffer>(GL_ELEMENT_ARRAY_BUFFER);
         auto indices_data_mb = mesh_cloud->allocMemoryOfFacets();
         indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
@@ -188,7 +194,7 @@ void glmMeshRenderer::render()
             }
         }
     }
-    spdlog::info("Render called!");
+    //spdlog::info("Render called!");
 }
 
 void glmMeshRenderer::resize(float width, float height)
