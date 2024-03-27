@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: main_window.h 
+ *  File: mesh_process.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,35 +28,14 @@
  *  SOFTWARE.
  */
 
-#ifndef __main_window_h__
-#define __main_window_h__
+#ifndef __mesh_process_h__
+#define __mesh_process_h__
 
-#include <QMainWindow>
-#include "render_window.h"
-#include "ui_mainwindow.h"
+#include "glmesh/core/glm_base_type.h"
+#include <pcl/PolygonMesh.h>
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-public:
-    auto renderWindow(){ return ren_window_; }
-    MainWindow(QApplication& app, QSurfaceFormat& sf);
-    ~MainWindow();
-    Ui::MainWindow ui;
+pcl::PolygonMesh::Ptr glmMeshToPclMesh(glmesh::glmMeshPtr glm_mesh);
+glmesh::glmMeshPtr PclMeshToglmMesh(pcl::PolygonMesh::Ptr pcl_mesh);
+glmesh::glmMeshPtr Triangulate(glmesh::glmMeshPtr poly_mesh);
 
-private slots:
-    void onRotationButtonChanged(int index);
-    void onMenuItemSlot_LoadMeshData(bool checked = false);
-    void onMenuItemSlot_DM_Points(bool checked = false);
-    void onMenuItemSlot_DM_Wire(bool checked = false);
-    void onMenuItemSlot_DM_Facet(bool checked = false);
-    void onMenuItemSlot_ChangeColor(bool checked = false);
-    void onTriangulateToggled(bool);
-    
-private:
-    void doLoadMeshData(glmesh::glmMeshPtr mesh);
-    RenderWindow* ren_window_ = nullptr; 
-    QString last_mesh_dir_;
-};
-
-#endif
+#endif // __mesh_process_h__

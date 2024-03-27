@@ -88,18 +88,24 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
 
     buffer_ = nullptr; //release old buffer
     buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
-    uint32_t vertice_byte_size = mesh_cloud->calcVertexBufferByteSize();
-    uint32_t color_byte_size = mesh_cloud->calcColorBufferByteSize();
-    buffer_->allocate(vertice_byte_size + color_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-    buffer_->allocateSub(0, vertice_byte_size, mesh_cloud->vertices.data());
-    if(color_byte_size)
-        buffer_->allocateSub(vertice_byte_size, color_byte_size, mesh_cloud->colors.data());
+    uint32_t vbs = mesh_cloud->calcByteSizeOfVertices();
+    uint32_t cbs = mesh_cloud->calcByteSizeOfColors();
+    uint32_t nbs = mesh_cloud->calcByteSizeOfNormals();
+    uint32_t total_byte_size = vbs + cbs + nbs;
+    buffer_->allocate(total_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    buffer_->allocateSub(0, vbs, mesh_cloud->vertices.data());
+    if(cbs)
+        buffer_->allocateSub(vbs, cbs, mesh_cloud->colors.data());
+    if(nbs)
+        buffer_->allocateSub(vbs + cbs, nbs, mesh_cloud->normals.data());
+    
     vao_ = nullptr; //release old vao
     vao_ = std::make_shared<glmVertexArray>();
     vao_->bindCurrent();
     vao_->bindBuffer(*buffer_);
-    if(mesh_cloud->existFacetData()){
-        indices_buffer_ = nullptr; //release old indices buffer
+    
+    indices_buffer_ = nullptr; //release old indices buffer
+    if(mesh_cloud->existFacetData()){        
         indices_buffer_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
         auto indices_data_mb = mesh_cloud->allocMemoryOfFacets();
         indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
@@ -112,9 +118,18 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
         program_->setUniformVec4("user_color", user_color_);
     }else{
         program_->setUniformInt("use_vcolor", 1);        
-        vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vertice_byte_size));
+        vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs));
         vao_->getAttrib(1)->enable();
     }
+    if(mesh_cloud->normals.empty()){
+        program_->setUniformInt("use_vnormal", 0);
+        program_->setUniformVec3("user_normal", user_normal_);
+    }else{
+        program_->setUniformInt("use_vnormal", 1);        
+        vao_->getAttrib(2)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs + cbs));
+        vao_->getAttrib(2)->enable();
+    }
+    
 }
 
 void glmMeshRenderer::setUserColor(const glm::vec4 &color)

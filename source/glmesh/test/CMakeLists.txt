@@ -30,8 +30,12 @@ set(SOURCE_FILES
     "mainwindow.ui"
     "ply_reader.h"
     "ply_reader.cpp"
+    "ply_reader.h"
+    "ply_reader.cpp"
     "render_window.h"
     "render_window.cpp"
+    "mesh_process.h"
+    "mesh_process.cpp"
 )
 
 # Build executable

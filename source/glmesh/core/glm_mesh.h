@@ -44,6 +44,8 @@ struct GLMESH_API glmMesh : public glmObject<glmMesh>
     static constexpr IndexType kPolyRestartIndex = 0xFFFFFFFF;    
     using VertexType = glm::vec3;
     using VertexListType = std::vector<VertexType>;
+    using NormalType = glm::vec3;    
+    using NormalListType = std::vector<NormalType>;
     using ColorType = glm::vec4;
     using ColorListType = std::vector<ColorType>;
     using TriangleFacetType = glm::u32vec3;
@@ -54,13 +56,15 @@ struct GLMESH_API glmMesh : public glmObject<glmMesh>
     glmMemoryBlockPtr allocMemoryOfFacets();
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
-    uint32_t calcVertexBufferByteSize()const; 
-    uint32_t calcColorBufferByteSize()const; 
+    uint32_t calcByteSizeOfVertices()const; 
+    uint32_t calcByteSizeOfColors()const; 
+    uint32_t calcByteSizeOfNormals()const; 
     uint32_t calcIndiceCount()const;
     bool isTriangulated()const{ return !triangle_facets.empty(); }
     bool existFacetData()const{ return triangle_facets.size() || poly_facets.size(); }
     VertexListType vertices;
     ColorListType colors;
+    NormalListType normals;
     TriangleFacetList triangle_facets;
     PolyFacetListType poly_facets;
 };

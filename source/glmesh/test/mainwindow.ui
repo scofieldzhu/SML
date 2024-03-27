@@ -47,10 +47,10 @@
       <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>211</width>
-         <height>131</height>
+         <x>9</x>
+         <y>9</y>
+         <width>232</width>
+         <height>176</height>
         </rect>
        </property>
        <property name="title">
@@ -73,10 +73,10 @@
       <widget class="QGroupBox" name="groupBox_2">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>190</y>
-         <width>211</width>
-         <height>201</height>
+         <x>9</x>
+         <y>191</y>
+         <width>232</width>
+         <height>71</height>
         </rect>
        </property>
        <property name="title">
@@ -103,6 +103,32 @@
           <width>121</width>
           <height>22</height>
          </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>270</y>
+         <width>232</width>
+         <height>111</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Mesh Process</string>
+       </property>
+       <widget class="QCheckBox" name="triangulate_cb">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>91</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Triangulate</string>
         </property>
        </widget>
       </widget>

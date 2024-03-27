@@ -58,14 +58,19 @@ glm::vec3 glmMesh::calcCenterPoint() const
     return  center * (1.0f / vertices.size());
 }
 
-uint32_t glmMesh::calcVertexBufferByteSize() const
+uint32_t glmMesh::calcByteSizeOfVertices() const
 {
     return sizeof(VertexType) * static_cast<uint32_t>(vertices.size());
 }
 
-uint32_t glmMesh::calcColorBufferByteSize() const
+uint32_t glmMesh::calcByteSizeOfColors() const
 {
     return sizeof(ColorType) * static_cast<uint32_t>(colors.size());
+}
+
+uint32_t glmMesh::calcByteSizeOfNormals() const
+{
+    return sizeof(NormalType) * static_cast<uint32_t>(normals.size());
 }
 
 uint32_t glmMesh::calcIndiceCount() const

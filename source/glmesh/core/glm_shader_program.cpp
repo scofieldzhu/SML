@@ -143,7 +143,7 @@ void glmShaderProgram::setUniformMatrix4fv(int32_t location, const glm::mat4& ma
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void glmShaderProgram::setUniformMatrix4fv(const char *name, const glm::mat4 &mat) const
+void glmShaderProgram::setUniformMatrix4fv(const char* name, const glm::mat4 &mat) const
 {
     setUniformMatrix4fv(glGetUniformLocation(id_, name), mat);
 }
@@ -151,6 +151,11 @@ void glmShaderProgram::setUniformMatrix4fv(const char *name, const glm::mat4 &ma
 void glmShaderProgram::setUniformVec4(const char* name, const glm::vec4& v) const
 {
     glUniform4f(glGetUniformLocation(id_, name), v[0], v[1], v[2], v[3]);
+}
+
+void glmShaderProgram::setUniformVec3(const char *name, const glm::vec3& v) const
+{
+    glUniform3f(glGetUniformLocation(id_, name), v[0], v[1], v[2]);
 }
 
 void glmShaderProgram::setUniformInt(const char* name, int v) const

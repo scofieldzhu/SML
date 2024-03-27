@@ -37,6 +37,7 @@
 #include <glmesh/core/glm_mesh_renderer.h>
 #include <glmesh/core/glm_trackball.h>
 #include "ply_reader.h"
+#include "mesh_process.h"
 
 MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     :QMainWindow(nullptr, Qt::WindowFlags())
@@ -63,6 +64,7 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     connect(ui.actionDM_Wire, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Wire(bool)));
     connect(ui.actionDM_Facet, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_DM_Facet(bool)));
     connect(ui.actionChange_Color, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_ChangeColor(bool)));
+    connect(ui.triangulate_cb, SIGNAL(toggled(bool)), this, SLOT(onTriangulateToggled(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +84,16 @@ void MainWindow::onMenuItemSlot_ChangeColor(bool checked)
     if(color.isValid()){
         ren_window_->renderer()->setUserColor(glm::vec4(color.redF(), color.greenF(), color.blueF(), 1.0f));
         ren_window_->update();
+    }
+}
+
+void MainWindow::onTriangulateToggled(bool toggled)
+{
+    if(toggled){
+        if(ren_window_->existMeshData()){
+            auto tri_mesh = Triangulate(ren_window_->renderer()->currentMeshCloud());
+            doLoadMeshData(tri_mesh);  
+        }
     }
 }
 
@@ -126,8 +138,21 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
     last_mesh_dir_ = QFileInfo(file_name).absoluteDir().absolutePath();
     glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
     ply_reader::LoadFile(file_name, *mesh_cloud, false);
-    ren_window_->loadMeshCloud(mesh_cloud);
+    doLoadMeshData(mesh_cloud);
+}
 
+void MainWindow::doLoadMeshData(glmesh::glmMeshPtr mesh_cloud)
+{
+    ren_window_->loadMeshCloud(mesh_cloud);
+    if(mesh_cloud->triangle_facets.empty()){
+        ui.triangulate_cb->setEnabled(true);
+        ui.triangulate_cb->setChecked(false);
+    }else{
+        ui.triangulate_cb->setEnabled(false);
+        ui.triangulate_cb->blockSignals(true);
+        ui.triangulate_cb->setChecked(true);
+        ui.triangulate_cb->blockSignals(false);
+    }
     //update mesh information label
     ui.mesh_info_label->setText(QString(" Vertex count: %1 \n Color count: %2 \n Triangle facet count: %3 \n Polygon facet count:%4")
         .arg(mesh_cloud->vertices.size())

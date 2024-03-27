@@ -62,6 +62,7 @@ public:
 private:
     glm::vec2 render_size_;
     glm::vec4 user_color_ = glm::vec4(1.0, 1.0, 0.0, 1.0);
+    glm::vec3 user_normal_ = glm::vec3(0.0f, 0.0f, 1.0f);
     glmMeshPtr cur_mesh_cloud_;
     glmBufferPtr buffer_;
     glmBufferPtr indices_buffer_;
