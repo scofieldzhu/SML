@@ -61,6 +61,16 @@ glmMeshRenderer::~glmMeshRenderer()
     destroy();
 }
 
+void glmMeshRenderer::setBackgroudBottomColor(const glm::vec3& color)
+{
+    bkg_bottom_color_ = color;
+}
+
+void glmMeshRenderer::setBackgroudTopColor(const glm::vec3& color)
+{
+    bkg_top_color_ = color;
+}
+
 void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
     if(mesh_cloud.get() == cur_mesh_cloud_.get()){
@@ -72,6 +82,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
         spdlog::warn("Mesh cloud contain a empty vertex list!");
         return;
     }
+    program_->use();
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
     glm::vec3 center_point = boundingbox.calcCenter();
     float diagonal_len = boundingbox.calcDiagonalLength();
@@ -83,7 +94,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
     far_plane_dist_ = 1.6f * diagonal_len;
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
+    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);    
     program_->setUniformMatrix4fv("projection", projection_);
 
     buffer_ = nullptr; //release old buffer
@@ -128,8 +139,7 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
         program_->setUniformInt("use_vnormal", 1);        
         vao_->getAttrib(2)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs + cbs));
         vao_->getAttrib(2)->enable();
-    }
-    
+    }    
 }
 
 void glmMeshRenderer::setUserColor(const glm::vec4 &color)
@@ -149,7 +159,33 @@ bool glmMeshRenderer::initialize(float width, float height)
         spdlog::error("gladLoadGL failed!");
         return false;
     }
-    program_ = std::make_shared<glmShaderProgram>();
+
+    bkg_program_ = glmShaderProgram::New();
+    if(!bkg_program_->addShaderSource(ShaderSource::kBkgVertexShaderSource, GL_VERTEX_SHADER))
+        return false;
+    if(!bkg_program_->addShaderSource(ShaderSource::kBkgFragmentShaderSource, GL_FRAGMENT_SHADER))
+        return false;
+    if(!bkg_program_->link())
+        return false;
+    bkg_program_->use();
+    float bkg_rt_vertices[] = 
+    {
+        -1.0f, -1.0f, 0.0f,  bkg_bottom_color_[0], bkg_bottom_color_[1], bkg_bottom_color_[2], 
+        1.0f, -1.0f, 0.0f,  bkg_bottom_color_[0], bkg_bottom_color_[1], bkg_bottom_color_[2],
+        -1.0f,  1.0f, 0.0f,  bkg_top_color_[0], bkg_top_color_[1], bkg_top_color_[2],
+        1.0f,  1.0f, 0.0f,  bkg_top_color_[0], bkg_top_color_[1], bkg_top_color_[2]
+    };
+    bkg_vertex_buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
+    bkg_vertex_buffer_->allocate(sizeof(bkg_rt_vertices), bkg_rt_vertices, 0);
+    bkg_vao_ = glmVertexArray::New();
+    bkg_vao_->bindCurrent();
+    bkg_vao_->bindBuffer(*bkg_vertex_buffer_);
+    bkg_vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(0));
+    bkg_vao_->getAttrib(0)->enable();
+    bkg_vao_->getAttrib(1)->setPointer(3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(3 * sizeof(float)));
+    bkg_vao_->getAttrib(1)->enable();
+
+    program_ = glmShaderProgram::New();
     if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
         return false;
     if(!program_->addShaderSource(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
@@ -171,20 +207,26 @@ bool glmMeshRenderer::initialize(float width, float height)
 
 void glmMeshRenderer::destroy()
 {
+    bkg_program_.reset();
+    bkg_vertex_buffer_.reset();
+    bkg_vao_.reset();
     program_.reset();
     buffer_.reset();
+    indices_buffer_.reset();
     vao_.reset();
 }
 
 void glmMeshRenderer::setModelMat(const glm::mat4& mat)
 {
     model_ = mat; 
+    program_->use();
     program_->setUniformMatrix4fv("model", model_);
 }
 
 void glmMeshRenderer::setCameraFovy(float fovy) 
 {
     fovy_ = fovy;
+    program_->use();
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
 }
@@ -198,7 +240,14 @@ void glmMeshRenderer::render()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
+    if(bkg_program_){
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        bkg_program_->use();
+        bkg_vao_->bindCurrent();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);  
+    }
     if(vao_){
+        program_->use();
         vao_->bindCurrent();
         auto gl_mode = stDisplayModeDict[display_mode_];
         if(gl_mode == GL_POINTS){
@@ -207,7 +256,7 @@ void glmMeshRenderer::render()
             glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
             if(cur_mesh_cloud_->existFacetData()){
                 if(cur_mesh_cloud_->isTriangulated()){
-                    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
                 }else{
                     glEnable(GL_PRIMITIVE_RESTART);
                     glPrimitiveRestartIndex(glmMesh::kPolyRestartIndex);
@@ -216,19 +265,19 @@ void glmMeshRenderer::render()
             }
         }
     }
-    //spdlog::info("Render called!");
 }
 
 void glmMeshRenderer::resize(float width, float height)
 {
+    spdlog::info("glmMeshRenderer resize!");
     render_size_ = {width, height};
     if(program_ == nullptr)
         return;
     glViewport(0, 0, (int)width, (int)height);
     win_aspect_ = width / height;
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
+    program_->use();
     program_->setUniformMatrix4fv("projection", projection_);
-    render();
 }
 
 GLMESH_NAMESPACE_END
