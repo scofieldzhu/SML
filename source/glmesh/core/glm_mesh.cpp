@@ -60,17 +60,17 @@ glm::vec3 glmMesh::calcCenterPoint() const
 
 uint32_t glmMesh::calcByteSizeOfVertices() const
 {
-    return sizeof(VertexType) * static_cast<uint32_t>(vertices.size());
+    return sizeof(glmVertex) * static_cast<uint32_t>(vertices.size());
 }
 
 uint32_t glmMesh::calcByteSizeOfColors() const
 {
-    return sizeof(ColorType) * static_cast<uint32_t>(colors.size());
+    return sizeof(glmColor) * static_cast<uint32_t>(colors.size());
 }
 
 uint32_t glmMesh::calcByteSizeOfNormals() const
 {
-    return sizeof(NormalType) * static_cast<uint32_t>(normals.size());
+    return sizeof(glmNormal) * static_cast<uint32_t>(normals.size());
 }
 
 uint32_t glmMesh::calcIndiceCount() const
@@ -95,7 +95,7 @@ glmMemoryBlockPtr glmMesh::allocMemoryOfFacets()
             return nullptr;            
         }
         char* data_ptr = reinterpret_cast<char*>(triangle_facets.data());
-        size_t size = triangle_facets.size() * sizeof(TriangleFacetType);
+        size_t size = triangle_facets.size() * sizeof(glmTriangleFacet);
         return std::make_shared<glmMemoryBlock>(data_ptr, size);     
     }
     size_t total_size = 0;
@@ -103,7 +103,7 @@ glmMemoryBlockPtr glmMesh::allocMemoryOfFacets()
         total_size += pf.size() * kIndexTypeSize;
     total_size += kIndexTypeSize * (poly_facets.size() - 1); //restart indexes size
     auto data_block = std::make_shared<glmMemoryBlock>(total_size);
-    auto cur_data_ptr = reinterpret_cast<IndexType*>(data_block->blockData());
+    auto cur_data_ptr = reinterpret_cast<glmIndex*>(data_block->blockData());
     auto end_data_ptr = data_block->blockData() + total_size;
     for(const auto& pf : poly_facets){
         memcpy(cur_data_ptr, pf.data(), pf.size() * kIndexTypeSize);

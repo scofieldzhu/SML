@@ -40,6 +40,27 @@
 
 GLMESH_NAMESPACE_BEGIN
 
+using glmIndex = uint32_t;
+using glmIndices = std::vector<glmIndex>;
+static constexpr size_t kIndexTypeSize = sizeof(glmIndex);
+
+using glmVertex = glm::vec3;
+static constexpr size_t kVertexTypeSize = sizeof(glmVertex);
+using glmVertexList = std::vector<glmVertex>;
+
+using glmNormal = glm::vec3;    
+using glmNormalList = std::vector<glmNormal>;
+
+using glmColor = glm::vec4;
+static constexpr size_t kColorTypeSize = sizeof(glmColor);
+using glmColorList = std::vector<glmColor>;
+
+using glmTriangleFacet = glm::u32vec3;
+using TriangleFacetList = std::vector<glmTriangleFacet>;
+
+using glmPolyFacet = glmIndices;
+using glmPolyFacetList = std::vector<glmPolyFacet>;
+
 struct glmMemoryBlock;
 using glmMemoryBlockPtr = std::shared_ptr<glmMemoryBlock>;
 
@@ -62,6 +83,9 @@ using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
 class glmWinEventHandler;
 
 class glmTrackball;
+
+class glmSphere;
+using glmSpherePtr = std::shared_ptr<glmSphere>;
 
 struct glmBoundingBox
 {

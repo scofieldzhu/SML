@@ -43,8 +43,8 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     :QMainWindow(nullptr, Qt::WindowFlags())
 {
     setMinimumSize(1024, 480);
-    setWindowTitle("3D mesh surface rendering control window");
     ui.setupUi(this);
+    setWindowTitle("3D mesh surface rendering control window");
     
     ren_window_ = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
     ren_window_->setFormat(sf);
@@ -55,7 +55,7 @@ MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     ui.rotate_key_cb->addItem("Left Button");
     ui.rotate_key_cb->addItem("Right Button");
     ui.rotate_key_cb->addItem("Middle Button");
-    ui.rotate_key_cb->setCurrentIndex(0);
+    ui.rotate_key_cb->setCurrentIndex(1);
     connect(ui.rotate_key_cb, SIGNAL(currentIndexChanged(int)), this, SLOT(onRotationButtonChanged(int)));
 
     connect(ui.actionLoad_Mesh_Data, SIGNAL(triggered(bool)), this, SLOT(onMenuItemSlot_LoadMeshData(bool)));
@@ -130,8 +130,10 @@ void MainWindow::onMenuItemSlot_DM_Wire(bool checked)
 void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
 {
     spdlog::info("Load mesh data");
-
-    QString file_name = QFileDialog::getOpenFileName(this, "Open file", last_mesh_dir_.isEmpty() ? QCoreApplication::applicationDirPath() : last_mesh_dir_, "PLY files (*.ply)");
+    QString mesh_dir = last_mesh_dir_.isEmpty() ? QCoreApplication::applicationDirPath() : last_mesh_dir_;
+    std::string  utf8_str = "F:/BaiduNetdiskDownload/牙齿模型";
+    mesh_dir = QString::fromUtf8(reinterpret_cast<const char*>(utf8_str.c_str()));
+    QString file_name = QFileDialog::getOpenFileName(this, "Open file", mesh_dir, "PLY files (*.ply)");
     if(file_name.isEmpty()){
         return; // user cancel
     }
@@ -139,6 +141,9 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
     glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
     ply_reader::LoadFile(file_name, *mesh_cloud, false);
     doLoadMeshData(mesh_cloud);
+    auto win_title = windowTitle();
+    win_title.append(QString(" - %1").arg(file_name));
+    setWindowTitle(win_title);
 }
 
 void MainWindow::doLoadMeshData(glmesh::glmMeshPtr mesh_cloud)
@@ -154,9 +159,10 @@ void MainWindow::doLoadMeshData(glmesh::glmMeshPtr mesh_cloud)
         ui.triangulate_cb->blockSignals(false);
     }
     //update mesh information label
-    ui.mesh_info_label->setText(QString(" Vertex count: %1 \n Color count: %2 \n Triangle facet count: %3 \n Polygon facet count:%4")
+    ui.mesh_info_label->setText(QString(" Vertex count: %1 \n Color count: %2 \n Normal count: %3 \n Triangle facet count: %4 \n Polygon facet count:%5")
         .arg(mesh_cloud->vertices.size())
         .arg(mesh_cloud->colors.size())
+        .arg(mesh_cloud->normals.size())
         .arg(mesh_cloud->triangle_facets.size())
         .arg(mesh_cloud->poly_facets.size()));
 }

@@ -57,14 +57,14 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh,
         result_mesh.vertices.push_back({x, y, z}); 
     }
     result_mesh.colors.clear();
-    if(mesh.cloud.fields.size() >= 6){
-        for(size_t i = 0; i < mesh.cloud.data.size(); i += mesh.cloud.point_step){
-            unsigned char r = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[3].offset]);
-            unsigned char g = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[4].offset]);
-            unsigned char b = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[5].offset]);
-            unsigned char a = 255;
-            if(mesh.cloud.fields.size() == 7)
-                a = *reinterpret_cast<unsigned char*>(&mesh.cloud.data[i + mesh.cloud.fields[6].offset]);
+    if(mesh.cloud.fields.size() > 3){
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::fromPCLPointCloud2(mesh.cloud, *cloud);
+        for(const auto& point : *cloud){
+            uint8_t r = point.r;
+            uint8_t g = point.g;
+            uint8_t b = point.b;
+            uint8_t a = point.a;  
             glm::vec4 clr = {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
             result_mesh.colors.push_back(std::move(clr));
         }
@@ -76,7 +76,7 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh,
     if(!need_triangulate){   
         result_mesh.poly_facets.clear();
         for(const auto& polygon : mesh.polygons){
-            glmMesh::PolyFacetType pf;
+            glmPolyFacet pf;
             for(auto idx : polygon.vertices)
                 pf.push_back(idx);
             result_mesh.poly_facets.push_back(std::move(pf));
@@ -90,7 +90,7 @@ bool ply_reader::LoadFile(const QString& filename, glmesh::glmMesh& result_mesh,
         ear_clipping.process(output_mesh);
         for(const auto& polygon : mesh.polygons){
             assert(polygon.vertices.size() == 3);
-            result_mesh.triangle_facets.push_back(glmMesh::TriangleFacetType(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
+            result_mesh.triangle_facets.push_back(glmTriangleFacet(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
         }
     }
     spdlog::info("Vertices count:{} Color count:{} Triangle facet count:{} polygon facet count:{}!", result_mesh.vertices.size(), result_mesh.colors.size(), result_mesh.triangle_facets.size(), result_mesh.poly_facets.size());

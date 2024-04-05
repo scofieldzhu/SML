@@ -40,6 +40,8 @@
 #include "glm_shader_program.h"
 #include "glm_shader_source.h"
 #include "glm_memory_block.h"
+#include "glm_misc.h"
+#include "glm_sphere.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -84,16 +86,16 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     }
     program_->use();
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
-    glm::vec3 center_point = boundingbox.calcCenter();
+    glm::vec3 center_point = cur_mesh_cloud_->calcCenterPoint();
     float diagonal_len = boundingbox.calcDiagonalLength();
-    spdlog::info("diagonal_len:{}", diagonal_len);
+    spdlog::info("diagonal_len:{} center_point:{}", diagonal_len, Vec3ToStr(center_point));
     //translate center of point cloud to origin point {0.0, 0.0, 0.0}
     model_ = glm::translate(glm::mat4(1.0), -center_point);
     program_->setUniformMatrix4fv("model", model_);
-    eye_ = {0.0f, 0.0f, diagonal_len};
+    eye_ = {0.0f, 0.0f, diagonal_len * 1.6f};
     view_  = glm::lookAt(eye_, focal_point_, viewup_);
     program_->setUniformMatrix4fv("view", view_);
-    far_plane_dist_ = 1.6f * diagonal_len;
+    far_plane_dist_ = eye_[2];
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);    
     program_->setUniformMatrix4fv("projection", projection_);
 
@@ -202,6 +204,10 @@ bool glmMeshRenderer::initialize(float width, float height)
     projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
     program_->setUniformMatrix4fv("projection", projection_);
     initialized_ = true;
+
+    sphere_ = glmSphere::New();
+    sphere_->setShaderProgram(program_);
+    sphere_->createSource();
     return true;
 }
 
@@ -239,6 +245,10 @@ void glmMeshRenderer::setDispalyMode(glmDisplayMode m)
 void glmMeshRenderer::render()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
+    
+   // glEnable(GL_BLEND);
+    //glEnable(GL_DEPTH_TEST);
+   // glDisable(GL_CULL_FACE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     if(bkg_program_){
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -246,14 +256,23 @@ void glmMeshRenderer::render()
         bkg_vao_->bindCurrent();
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);  
     }
-    if(vao_){
+    if(sphere_){
         program_->use();
+        program_->setUniformInt("primitive_type", 0);
+        program_->setUniformInt("use_vcolor", 1);
+        //program_->setUniformVec4("user_color", user_color_);
+        sphere_->draw();
+    }
+    if(vao_){
+        //glEnable(GL_DEPTH_TEST);
+        program_->use();
+        program_->setUniformInt("primitive_type", 1);
         vao_->bindCurrent();
         auto gl_mode = stDisplayModeDict[display_mode_];
+        glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
         if(gl_mode == GL_POINTS){
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
-        }else{
-            glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
+        }else{            
             if(cur_mesh_cloud_->existFacetData()){
                 if(cur_mesh_cloud_->isTriangulated()){
                     glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);

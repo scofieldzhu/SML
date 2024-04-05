@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_trackball.h 
+ *  File: glm_sphere.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,38 +28,48 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_trackball_h__
-#define __glm_trackball_h__
+#ifndef __glm_sphere_h__
+#define __glm_sphere_h__
 
-#include <glm/gtx/quaternion.hpp>
-#include "glmesh/core/glm_win_event_handler.h"
+#include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_object.h"
 
 GLMESH_NAMESPACE_BEGIN
-
-class GLMESH_API glmTrackball : public glmWinEventHandler
+class GLMESH_API glmSphere : public glmObject<glmSphere>
 {
 public:
-    void bindRotationToMouseButton(glmMouseButton button);
-    void handleEvent(const glmWinEvent& event) override;
-    glmTrackball(glmMeshRendererPtr ren);
-    ~glmTrackball();
+    bool draw();
+    void createSource();
+    void setLongitudeResolution(uint32_t res);
+    uint32_t longitudeResolution() const{ return longi_res_; }
+    void setLatitudeResolution(uint32_t res);
+    uint32_t latitudeResolution() const{ return latit_res_; }
+    void setCenter(const glm::vec3& center);    
+    const glm::vec3& center() const{ return center_; }
+    void setRadius(float radius);
+    float radius() const{ return radius_; }
+    void setColor(const glm::vec3& color);
+    const glm::vec3& color() const{ return color_; }
+    void setShaderProgram(glmShaderProgramPtr shader_program);
+    glmShaderProgramPtr shaderProgram() const{ return shader_program_; }
+    glmSphere();
+    glmSphere(const glm::vec3& center, float radius);
+    ~glmSphere();
 
 private:
-    glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
-    glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
-    void handleMouseMove(const glmWinEvent& event);
-    void handleMouseEvent(const glmWinEvent& event);
-    void handleKeyboardEvent(const glmWinEvent& event);
-    void handleWheelScroll(const glmWinEvent& event);
-    void handleWindowEvent(const glmWinEvent& event);
-    void handleResize(const glmWinEvent& event);
-    float width_ = 0.0f;
-    float height_ = 0.0f;
-    glm::vec2 tracking_mouse_pos_;
-    glmMeshRendererPtr renderer_;
-    glmMouseButton rotation_button_ = glmMouseButton::kLeft;
-    glmMouseButton current_pressed_button_ = glmMouseButton::kNone;
+    glm::vec3 center_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    float radius_ = 1.0f;
+    glm::vec3 color_ = glm::vec3(1.0f, 1.0f, 1.0f);
+    uint32_t longi_res_ = 180;
+    uint32_t latit_res_ = 90;
+    glmShaderProgramPtr shader_program_ = nullptr;
+    glmVertexArrayPtr vao_ = nullptr;
+    glmBufferPtr vbo_ = nullptr;
+    glmBufferPtr ebo_ = nullptr;
+    glmVertexList vertexes_;
+    glmColorList colors_;
+    glmIndices indices_;
 };
 
 GLMESH_NAMESPACE_END

@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_trackball.h 
+ *  File: glm_misc.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,39 +28,15 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_trackball_h__
-#define __glm_trackball_h__
+#ifndef __glm_misc_h__
+#define __glm_misc_h__
 
-#include <glm/gtx/quaternion.hpp>
-#include "glmesh/core/glm_win_event_handler.h"
-#include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_base_type.h"
+#include <string>
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmTrackball : public glmWinEventHandler
-{
-public:
-    void bindRotationToMouseButton(glmMouseButton button);
-    void handleEvent(const glmWinEvent& event) override;
-    glmTrackball(glmMeshRendererPtr ren);
-    ~glmTrackball();
-
-private:
-    glm::quat rotate(const glm::vec2& start_pos, const glm::vec2& end_pos)const;
-    glm::vec3 mapToSphere(const glm::vec2& win_pos)const;
-    void handleMouseMove(const glmWinEvent& event);
-    void handleMouseEvent(const glmWinEvent& event);
-    void handleKeyboardEvent(const glmWinEvent& event);
-    void handleWheelScroll(const glmWinEvent& event);
-    void handleWindowEvent(const glmWinEvent& event);
-    void handleResize(const glmWinEvent& event);
-    float width_ = 0.0f;
-    float height_ = 0.0f;
-    glm::vec2 tracking_mouse_pos_;
-    glmMeshRendererPtr renderer_;
-    glmMouseButton rotation_button_ = glmMouseButton::kLeft;
-    glmMouseButton current_pressed_button_ = glmMouseButton::kNone;
-};
+std::string Vec3ToStr(const glm::vec3& v);
 
 GLMESH_NAMESPACE_END
 

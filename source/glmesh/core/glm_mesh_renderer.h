@@ -88,6 +88,7 @@ private:
     float fovy_ = 45.0f;
     glm::mat4 projection_;
     glmDisplayMode display_mode_ = glmDisplayMode::kPoint;
+    glmSpherePtr sphere_ = nullptr;
     bool initialized_ = false;
 };
 

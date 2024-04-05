@@ -88,7 +88,7 @@ glmMeshPtr PclMeshToglmMesh(pcl::PolygonMesh::Ptr pcl_mesh)
     }
     for(const auto& polygon : pcl_mesh->polygons){
         assert(polygon.vertices.size() == 3);
-        result_mesh->triangle_facets.push_back(glmMesh::TriangleFacetType(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
+        result_mesh->triangle_facets.push_back(glmTriangleFacet(polygon.vertices[0], polygon.vertices[1], polygon.vertices[2]));
     }
     return result_mesh;
 }
