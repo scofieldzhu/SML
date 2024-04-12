@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_object.h 
+ *  File: glm_actor.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,25 +28,25 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_object_h__
-#define __glm_object_h__
+#ifndef __glm_actor_h__
+#define __glm_actor_h__
 
-#include <memory>
-#include "glmesh/core/glm_nsp.h"
+#include "glmesh/core/glm_base_type.h"
+#include "glmesh/core/glm_export.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-template <class D>
-class glmObject
+class GLMESH_API glmActor
 {
-public: 
-    template <typename... Args>
-    static std::shared_ptr<D> New(Args&&... args)
-    {
-        return std::make_shared<D>(std::forward<Args>(args)...);
-    }
+public:
+    virtual void draw() = 0;    
+    virtual ~glmActor();
+
+protected:
+    glmActor();
 };
 
 GLMESH_NAMESPACE_END
 
-#endif
+#endif // __glm_actor_h__
+

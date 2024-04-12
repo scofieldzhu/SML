@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_sphere.h 
+ *  File: glm_sphere_actor.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,18 +28,17 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_sphere_h__
-#define __glm_sphere_h__
+#ifndef __glm_sphere_actor_h__
+#define __glm_sphere_actor_h__
 
-#include "glmesh/core/glm_base_type.h"
-#include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include "glmesh/core/glm_actor.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
-class GLMESH_API glmSphere : public glmObject<glmSphere>
+class GLMESH_API glmSphereActor : public glmActor, public glmInstantiator<glmSphereActor>
 {
 public:
-    bool draw();
+    void draw() override;
     void createSource();
     void setLongitudeResolution(uint32_t res);
     uint32_t longitudeResolution() const{ return longi_res_; }
@@ -53,9 +52,9 @@ public:
     const glm::vec3& color() const{ return color_; }
     void setShaderProgram(glmShaderProgramPtr shader_program);
     glmShaderProgramPtr shaderProgram() const{ return shader_program_; }
-    glmSphere();
-    glmSphere(const glm::vec3& center, float radius);
-    ~glmSphere();
+    glmSphereActor();
+    glmSphereActor(const glm::vec3& center, float radius);
+    ~glmSphereActor();
 
 private:
     glm::vec3 center_ = glm::vec3(0.0f, 0.0f, 0.0f);

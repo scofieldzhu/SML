@@ -1,10 +1,11 @@
+#include "glm_actor.h"
 /* 
  *  glmesh is a mesh data render library base on QOpengl.
  *  glmesh provides object-oriented interfaces to the OpenGL API (3.0 and higher). 
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_vertex_array.h 
+ *  File: glm_actor.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,35 +29,16 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_vertex_array_h__
-#define __glm_vertex_array_h__
-
-#include <map>
-#include "glmesh/core/glm_vertex_array_attrib.h"
-#include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_instantiator.h"
+#include "glm_actor.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmVertexArray : public glmInstantiator<glmVertexArray>
+glmActor::glmActor()
 {
-public:
-    void bindCurrent();
-    void bindBuffer(const glmBuffer& buffer);
-    void unbindBuffer(const glmBuffer& buffer);
-    uint32_t id()const{ return id_; }
-    glmVertexArrayAttrib* getAttrib(uint32_t index);
-    glmVertexArray& operator=(const glmVertexArray&) = delete;
-    glmVertexArray();
-    glmVertexArray(const glmVertexArray&) = delete;
-    ~glmVertexArray();
+}
 
-private:
-    uint32_t id_ = 0;
-    using AttribUPtr = std::unique_ptr<glmVertexArrayAttrib>;
-    std::map<uint32_t, AttribUPtr> attrib_map_;
-};
+glmActor::~glmActor()
+{    
+}
 
 GLMESH_NAMESPACE_END
-
-#endif

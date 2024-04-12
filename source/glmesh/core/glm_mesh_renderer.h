@@ -34,11 +34,11 @@
 #include <glm/gtx/quaternion.hpp>
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmMeshRenderer : public glmObject<glmMeshRenderer>
+class GLMESH_API glmMeshRenderer : public glmInstantiator<glmMeshRenderer>
 {
 public:
     void setBackgroudTopColor(const glm::vec3& color);

@@ -41,7 +41,7 @@
 #include "glm_shader_source.h"
 #include "glm_memory_block.h"
 #include "glm_misc.h"
-#include "glm_sphere.h"
+#include "glm_sphere_actor.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -205,7 +205,7 @@ bool glmMeshRenderer::initialize(float width, float height)
     program_->setUniformMatrix4fv("projection", projection_);
     initialized_ = true;
 
-    sphere_ = glmSphere::New();
+    sphere_ = glmSphereActor::New();
     sphere_->setShaderProgram(program_);
     sphere_->createSource();
     return true;

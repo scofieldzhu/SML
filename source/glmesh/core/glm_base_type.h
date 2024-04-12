@@ -84,8 +84,8 @@ class glmWinEventHandler;
 
 class glmTrackball;
 
-class glmSphere;
-using glmSpherePtr = std::shared_ptr<glmSphere>;
+class glmSphereActor;
+using glmSpherePtr = std::shared_ptr<glmSphereActor>;
 
 struct glmBoundingBox
 {

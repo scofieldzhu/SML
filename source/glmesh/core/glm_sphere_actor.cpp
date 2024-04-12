@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_sphere.cpp 
+ *  File: glm_sphere_actor.cpp 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -27,7 +27,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-#include "glm_sphere.h"
+
+#include "glm_sphere_actor.h"
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 #include <algorithm>
@@ -38,31 +39,31 @@
 
 GLMESH_NAMESPACE_BEGIN
 
-glmSphere::glmSphere()
+glmSphereActor::glmSphereActor()
 {
 }
 
-glmSphere::glmSphere(const glm::vec3& center, float radius)
+glmSphereActor::glmSphereActor(const glm::vec3& center, float radius)
     :center_(center), 
     radius_(radius)
 {
 }
 
-glmSphere::~glmSphere()
+glmSphereActor::~glmSphereActor()
 {
 }
 
-void glmSphere::setColor(const glm::vec3& color)
+void glmSphereActor::setColor(const glm::vec3& color)
 {
     color_ = color;
 }
 
-void glmSphere::setShaderProgram(glmShaderProgramPtr shader_program)
+void glmSphereActor::setShaderProgram(glmShaderProgramPtr shader_program)
 {
     shader_program_ = shader_program;
 }
 
-bool glmSphere::draw()
+void glmSphereActor::draw()
 {
     // if(shader_program_ == nullptr){
     //     spdlog::warn("shader program is not set.");
@@ -72,10 +73,9 @@ bool glmSphere::draw()
     vao_->bindCurrent();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(indices_.size()), GL_UNSIGNED_INT, nullptr);
-    return true;
 }
 
-void glmSphere::createSource()
+void glmSphereActor::createSource()
 {
     vao_ = glmVertexArray::New();
     vao_->bindCurrent();
@@ -94,7 +94,7 @@ void glmSphere::createSource()
             pos.y = radius_ * sin(glm::radians((float)t)) * sin(glm::radians((float)p));
             pos.z = radius_ * cos(glm::radians((float)t));
             vertexes_.push_back(pos);
-            glmColor color = {(float)r / (float)latit_res_, (float)c / (float)longi_res_, 0.5f, 1.0f};
+            glmColor color = {(float)r / (float)latit_res_, 0.5f, 0.5f, 1.0f};
             colors_.push_back(color);
             if(r && c){
                 int cur_idx = longi_res_ * r + c;
@@ -127,22 +127,22 @@ void glmSphere::createSource()
     vao_->bindBuffer(*ebo_);
 }
 
-void glmSphere::setLongitudeResolution(uint32_t res)
+void glmSphereActor::setLongitudeResolution(uint32_t res)
 {
     longi_res_ = std::clamp(res, (uint32_t)0, (uint32_t)360);
 }
 
-void glmSphere::setLatitudeResolution(uint32_t res)
+void glmSphereActor::setLatitudeResolution(uint32_t res)
 {
     latit_res_ = std::clamp(res, (uint32_t)1, (uint32_t)180);
 }
 
-void glmSphere::setCenter(const glm::vec3 &center)
+void glmSphereActor::setCenter(const glm::vec3 &center)
 {
     center_ = center;
 }
 
-void glmSphere::setRadius(float radius)
+void glmSphereActor::setRadius(float radius)
 {
     radius_ = radius;
 }
