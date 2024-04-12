@@ -42,9 +42,7 @@ class GLMESH_API glmMeshRenderer : public glmInstantiator<glmMeshRenderer>
 {
 public:
     void setBackgroudTopColor(const glm::vec3& color);
-    const auto& backgroudTopColor()const{ return bkg_top_color_; }
     void setBackgroudBottomColor(const glm::vec3& color);
-    const auto& backgroudBottomColor()const{ return bkg_bottom_color_; }
     auto currentMeshCloud()const{ return cur_mesh_cloud_; }
     void loadMeshCloud(glmMeshPtr mesh_cloud);
     void setUserColor(const glm::vec4& color);
@@ -64,8 +62,6 @@ public:
     ~glmMeshRenderer();
 
 private:
-    glm::vec3 bkg_top_color_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 bkg_bottom_color_ = glm::vec3(0.5f, 0.5f, 1.0f);
     glm::vec2 render_size_;
     glm::vec4 user_color_ = glm::vec4(1.0, 1.0, 0.0, 1.0);
     glm::vec3 user_normal_ = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -74,9 +70,6 @@ private:
     glmBufferPtr indices_buffer_;
     glmVertexArrayPtr vao_;
     glmShaderProgramPtr program_;
-    glmShaderProgramPtr bkg_program_;
-    glmVertexArrayPtr bkg_vao_;
-    glmBufferPtr bkg_vertex_buffer_;
     glm::mat4 model_;
     glm::mat4 view_;
     glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -89,6 +82,7 @@ private:
     glm::mat4 projection_;
     glmDisplayMode display_mode_ = glmDisplayMode::kPoint;
     glmSpherePtr sphere_ = nullptr;
+    glmActorPtr bkg_ = nullptr;
     bool initialized_ = false;
 };
 

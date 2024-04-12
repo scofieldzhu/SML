@@ -40,10 +40,19 @@ class GLMESH_API glmActor
 {
 public:
     virtual void draw() = 0;    
+    virtual bool createSource() = 0;
+    const glmMeshRendererList& renderers()const{ return renderers_; }
+    void setMatrix(glmMatrixPtr matrix){ matrix_ = matrix; }
+    glmMatrixPtr matrix() const{ return matrix_; }
+    virtual void addToRenderer(glmMeshRendererPtr ren);
+    virtual void removeFromRenderer(glmMeshRendererPtr ren);
     virtual ~glmActor();
 
 protected:
+    
     glmActor();
+    glmMatrixPtr matrix_;
+    glmMeshRendererList renderers_;
 };
 
 GLMESH_NAMESPACE_END

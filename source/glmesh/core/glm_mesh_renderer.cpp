@@ -42,6 +42,7 @@
 #include "glm_memory_block.h"
 #include "glm_misc.h"
 #include "glm_sphere_actor.h"
+#include "glm_bkg_actor.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -56,6 +57,7 @@ namespace{
 
 glmMeshRenderer::glmMeshRenderer()
 {
+    bkg_ = glmBkgActor::New();
 }
 
 glmMeshRenderer::~glmMeshRenderer()
@@ -65,12 +67,14 @@ glmMeshRenderer::~glmMeshRenderer()
 
 void glmMeshRenderer::setBackgroudBottomColor(const glm::vec3& color)
 {
-    bkg_bottom_color_ = color;
+    auto bkg_actor = std::dynamic_pointer_cast<glmBkgActor>(bkg_);
+    bkg_actor->setBottomColor(color);
 }
 
 void glmMeshRenderer::setBackgroudTopColor(const glm::vec3& color)
 {
-    bkg_top_color_ = color;
+    auto bkg_actor = std::dynamic_pointer_cast<glmBkgActor>(bkg_);
+    bkg_actor->setTopColor(color);
 }
 
 void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
@@ -162,30 +166,7 @@ bool glmMeshRenderer::initialize(float width, float height)
         return false;
     }
 
-    bkg_program_ = glmShaderProgram::New();
-    if(!bkg_program_->addShaderSource(ShaderSource::kBkgVertexShaderSource, GL_VERTEX_SHADER))
-        return false;
-    if(!bkg_program_->addShaderSource(ShaderSource::kBkgFragmentShaderSource, GL_FRAGMENT_SHADER))
-        return false;
-    if(!bkg_program_->link())
-        return false;
-    bkg_program_->use();
-    float bkg_rt_vertices[] = 
-    {
-        -1.0f, -1.0f, 0.0f,  bkg_bottom_color_[0], bkg_bottom_color_[1], bkg_bottom_color_[2], 
-        1.0f, -1.0f, 0.0f,  bkg_bottom_color_[0], bkg_bottom_color_[1], bkg_bottom_color_[2],
-        -1.0f,  1.0f, 0.0f,  bkg_top_color_[0], bkg_top_color_[1], bkg_top_color_[2],
-        1.0f,  1.0f, 0.0f,  bkg_top_color_[0], bkg_top_color_[1], bkg_top_color_[2]
-    };
-    bkg_vertex_buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
-    bkg_vertex_buffer_->allocate(sizeof(bkg_rt_vertices), bkg_rt_vertices, 0);
-    bkg_vao_ = glmVertexArray::New();
-    bkg_vao_->bindCurrent();
-    bkg_vao_->bindBuffer(*bkg_vertex_buffer_);
-    bkg_vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(0));
-    bkg_vao_->getAttrib(0)->enable();
-    bkg_vao_->getAttrib(1)->setPointer(3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(3 * sizeof(float)));
-    bkg_vao_->getAttrib(1)->enable();
+    bkg_->createSource();
 
     program_ = glmShaderProgram::New();
     if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
@@ -213,9 +194,7 @@ bool glmMeshRenderer::initialize(float width, float height)
 
 void glmMeshRenderer::destroy()
 {
-    bkg_program_.reset();
-    bkg_vertex_buffer_.reset();
-    bkg_vao_.reset();
+    bkg_.reset();
     program_.reset();
     buffer_.reset();
     indices_buffer_.reset();
@@ -250,12 +229,7 @@ void glmMeshRenderer::render()
     //glEnable(GL_DEPTH_TEST);
    // glDisable(GL_CULL_FACE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
-    if(bkg_program_){
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        bkg_program_->use();
-        bkg_vao_->bindCurrent();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);  
-    }
+    bkg_->draw();
     if(sphere_){
         program_->use();
         program_->setUniformInt("primitive_type", 0);

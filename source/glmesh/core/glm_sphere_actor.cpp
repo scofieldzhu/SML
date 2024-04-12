@@ -75,7 +75,7 @@ void glmSphereActor::draw()
     glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void glmSphereActor::createSource()
+bool glmSphereActor::createSource()
 {
     vao_ = glmVertexArray::New();
     vao_->bindCurrent();
@@ -125,6 +125,8 @@ void glmSphereActor::createSource()
     ebo_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
     ebo_->allocate(indices_.size() * sizeof(glmIndex), indices_.data(), 0);
     vao_->bindBuffer(*ebo_);
+
+    return true;
 }
 
 void glmSphereActor::setLongitudeResolution(uint32_t res)

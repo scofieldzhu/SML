@@ -39,7 +39,7 @@ class GLMESH_API glmSphereActor : public glmActor, public glmInstantiator<glmSph
 {
 public:
     void draw() override;
-    void createSource();
+    bool createSource() override;
     void setLongitudeResolution(uint32_t res);
     uint32_t longitudeResolution() const{ return longi_res_; }
     void setLatitudeResolution(uint32_t res);

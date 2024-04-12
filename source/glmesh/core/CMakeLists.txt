@@ -38,6 +38,8 @@ set(SOURCE_FILES
     "glm_mesh.cpp"
     "glm_misc.h"
     "glm_misc.cpp"
+    "glm_bkg_actor.cpp"
+    "glm_bkg_actor.h"
     "glm_sphere_actor.cpp"
     "glm_shader_program.cpp"
     "glm_trackball.cpp"

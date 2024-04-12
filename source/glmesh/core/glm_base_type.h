@@ -79,10 +79,17 @@ using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
 
 class glmMeshRenderer;
 using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
+using glmMeshRendererList = std::vector<glmMeshRendererPtr>;
+
+using glmMatrix = glm::mat4;
+using glmMatrixPtr = std::shared_ptr<glmMatrix>;
 
 class glmWinEventHandler;
 
 class glmTrackball;
+
+class glmActor;
+using glmActorPtr = std::shared_ptr<glmActor>;
 
 class glmSphereActor;
 using glmSpherePtr = std::shared_ptr<glmSphereActor>;
