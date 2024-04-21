@@ -31,6 +31,7 @@
 #include "glm_trackball.h"
 #include <spdlog/spdlog.h>
 #include "glm_mesh_renderer.h"
+#include "glm_camera.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -74,9 +75,9 @@ void glmTrackball::handleMouseMove(const glmWinEvent& event)
     if(rotation_button_ != glmMouseButton::kNone && current_pressed_button_ == rotation_button_){
         glm::vec2 now_pos = event.pos;
         auto quad = rotate(tracking_mouse_pos_, now_pos);
-        auto mat = renderer_->modelMat();
+        auto mat = renderer_->activeCamera()->model();
         mat = mat * glm::toMat4(quad);
-        renderer_->setModelMat(mat);
+        renderer_->activeCamera()->setModel(mat);
         tracking_mouse_pos_ = now_pos;
     }
 }
@@ -115,10 +116,10 @@ void glmTrackball::handleKeyboardEvent(const glmWinEvent& event)
 
 void glmTrackball::handleWheelScroll(const glmWinEvent& event)
 {
-    float fv = renderer_->cameraFovy();
+    float fv = renderer_->activeCamera()->fovy();
     fv -= event.scroll_delta;
     fv = std::max(1.0f, std::min(fv, 45.0f));
-    renderer_->setCameraFovy(fv);
+    renderer_->activeCamera()->setFovy(fv);
 }
 
 void glmTrackball::handleWindowEvent(const glmWinEvent& event)

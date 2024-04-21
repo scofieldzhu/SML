@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_mesh_renderer.h 
+ *  File: glm_camera.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,47 +28,56 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_mesh_renderer_h__
-#define __glm_mesh_renderer_h__
+#ifndef __glm_camera_h__
+#define __glm_camera_h__
 
-#include <glm/gtx/quaternion.hpp>
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
 #include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmMeshRenderer : public glmInstantiator<glmMeshRenderer>, public std::enable_shared_from_this<glmMeshRenderer>
+class GLMESH_API glmCamera : public glmInstantiator<glmCamera>
 {
 public:
-    void setBackgroudTopColor(const glm::vec3& color);
-    void setBackgroudBottomColor(const glm::vec3& color);
-    glmMeshPtr currentMeshCloud()const;
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
-    void setUserColor(const glm::vec4& color);
-    bool initialize(float width, float height);
-    void destroy();
-    void resize(float width, float height);
-    glm::vec2 renderSize()const{ return render_size_; }
-    void setDispalyMode(glmDisplayMode m);
-    auto displayMode()const;
-    void resetView();
-    void render();
-    auto meshActor(){ return mesh_actor_; }
-    auto bkgActor(){ return bkg_; }
-    glmCameraPtr activeCamera(){ return camera_; }
-    glmMeshRenderer();
-    ~glmMeshRenderer();
+    void setModel(const glmMatrix& mat);
+    const auto& model(){ return model_; }
+    void setView(const glmMatrix& mat);
+    const auto& view(){ return view_; }
+    void setProjection(const glmMatrix& mat);
+    const auto& projection(){ return projection_; }
+    void setEye(const glmPt3& pt);
+    const auto& eye()const{ return eye_; }
+    void setFocalPoint(const glmPt3& pt);
+    const auto& focalPoint()const{ return focal_point_; }
+    void setViewUp(const glmNormal& n);
+    const auto& viewUp()const{ return viewup_; }
+    void setWinAspect(float f);
+    auto winAspect()const{ return win_aspect_; }
+    void setFarPlaneDist(float dist);
+    auto farPlaneDist()const{ return far_plane_dist_; }
+    void setNearPlaneDist(float dist);
+    auto nearPlaneDist()const{ return near_plane_dist_; }
+    void setFovy(float f);
+    auto fovy()const{ return fovy_; }
+    void recalc();
+    void syncDataToShader(glmShaderProgramPtr prog);
+    glmCamera();
+    ~glmCamera();
 
 private:
-    void syncCameraToShader();
-    glmShaderProgramPtr program_;
-    glmCameraPtr camera_;
-    glmSpherePtr sphere_;
-    glmBkgActorPtr bkg_;
-    glmMeshActorPtr mesh_actor_;
-    glm::vec2 render_size_;
-    bool initialized_ = false;
+    void calcProjection();
+    void calcView();
+    glmMatrix model_;
+    glmMatrix view_;
+    glmMatrix projection_;
+    glmPt3 eye_ = glmPt3(0.0f, 0.0f, 1.0f);
+    glmPt3 focal_point_ = glmPt3(0.0f, 0.0f, 0.0f);
+    glmNormal viewup_ = glmNormal(0.0f, 1.0f, 0.0f);
+    float win_aspect_ = 1.0f;
+    float near_plane_dist_ = 0.0f;
+    float far_plane_dist_ = 2.0f;
+    float fovy_ = 45.0f;
 };
 
 GLMESH_NAMESPACE_END

@@ -47,6 +47,9 @@ static constexpr size_t kIndexTypeSize = sizeof(glmIndex);
 using glmVertex = glm::vec3;
 static constexpr size_t kVertexTypeSize = sizeof(glmVertex);
 using glmVertexList = std::vector<glmVertex>;
+inline size_t CalcBytesOfVertexList(const glmVertexList& vl){ return vl.size() * kVertexTypeSize; }
+
+using glmPt3 = glm::vec3;
 
 using glmNormal = glm::vec3;    
 using glmNormalList = std::vector<glmNormal>;
@@ -82,7 +85,6 @@ using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
 using glmMeshRendererList = std::vector<glmMeshRendererPtr>;
 
 using glmMatrix = glm::mat4;
-using glmMatrixPtr = std::shared_ptr<glmMatrix>;
 
 class glmWinEventHandler;
 
@@ -91,8 +93,17 @@ class glmTrackball;
 class glmActor;
 using glmActorPtr = std::shared_ptr<glmActor>;
 
+class glmBkgActor;
+using glmBkgActorPtr = std::shared_ptr<glmBkgActor>;
+
 class glmSphereActor;
 using glmSpherePtr = std::shared_ptr<glmSphereActor>;
+
+class glmMeshActor;
+using glmMeshActorPtr = std::shared_ptr<glmMeshActor>;
+
+class glmCamera;
+using glmCameraPtr = std::shared_ptr<glmCamera>;
 
 struct glmBoundingBox
 {

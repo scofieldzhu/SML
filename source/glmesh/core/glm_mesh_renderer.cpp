@@ -38,13 +38,15 @@
 #include "glm_sphere_actor.h"
 #include "glm_bkg_actor.h"
 #include "glm_mesh_actor.h"
+#include "glm_camera.h"
+#include "glm_shader_source.h"
 
 GLMESH_NAMESPACE_BEGIN
 
 glmMeshRenderer::glmMeshRenderer()
+    :bkg_(glmBkgActor::New()),
+    camera_(glmCamera::New())
 {
-    bkg_ = glmBkgActor::New();
-    mesh_actor_ = glmMeshActor::New();
 }
 
 glmMeshRenderer::~glmMeshRenderer()
@@ -54,29 +56,32 @@ glmMeshRenderer::~glmMeshRenderer()
 
 void glmMeshRenderer::setBackgroudBottomColor(const glm::vec3& color)
 {
-    auto bkg_actor = std::dynamic_pointer_cast<glmBkgActor>(bkg_);
-    bkg_actor->setBottomColor(color);
+    bkg_->setBottomColor(color);
 }
 
 glmMeshPtr glmMeshRenderer::currentMeshCloud() const
 {
-    return std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->currentMeshCloud();
+    return mesh_actor_->currentMeshCloud();
 }
 
 void glmMeshRenderer::setBackgroudTopColor(const glm::vec3& color)
 {
-    auto bkg_actor = std::dynamic_pointer_cast<glmBkgActor>(bkg_);
-    bkg_actor->setTopColor(color);
+    bkg_->setTopColor(color);
 }
 
 void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
 {
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->loadMeshCloud(mesh_cloud);
+    if(mesh_actor_ == nullptr){
+        mesh_actor_ = glmMeshActor::New(program_);
+    }
+    mesh_actor_->setMeshCloud(mesh_cloud);
+    mesh_actor_->addToRenderer(shared_from_this());
 }
 
 void glmMeshRenderer::setUserColor(const glm::vec4 &color)
 {
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->setUserColor(color);
+    if(mesh_actor_)
+        mesh_actor_->setUserColor(color);
 }
 
 bool glmMeshRenderer::initialize(float width, float height)
@@ -90,17 +95,21 @@ bool glmMeshRenderer::initialize(float width, float height)
         return false;
     }
 
+    program_ = glmShaderProgram::New();
+    if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
+        return false;
+    if(!program_->addShaderSource(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
+        return false;
+    if(!program_->link())
+        return false;
+    program_->use();
+
     bkg_->createSource();
-
-    auto mesh_actor = std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_);
-    mesh_actor->setRendererSize(width, height);
-    mesh_actor->createSource();
-
     initialized_ = true;
 
-    sphere_ = glmSphereActor::New();
-    sphere_->setShaderProgram(mesh_actor->program());
-    sphere_->createSource();
+    // sphere_ = glmSphereActor::New();
+    // sphere_->setShaderProgram(program_);
+    // sphere_->createSource();
     return true;
 }
 
@@ -108,26 +117,6 @@ void glmMeshRenderer::destroy()
 {
     bkg_.reset();
     mesh_actor_.reset();
-}
-
-void glmMeshRenderer::setModelMat(const glm::mat4& mat)
-{
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->setModelMat(mat);
-}
-
-glm::mat4 glmMeshRenderer::modelMat()
-{
-    return std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->modelMat();
-}
-
-float glmMeshRenderer::cameraFovy() const
-{
-    return std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->cameraFovy();
-}
-
-void glmMeshRenderer::setCameraFovy(float fovy) 
-{
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->setCameraFovy(fovy);
 }
 
 void glmMeshRenderer::setDispalyMode(glmDisplayMode m)
@@ -141,22 +130,21 @@ void glmMeshRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
     bkg_->draw();
     if(sphere_){
-        auto mesh_actor = std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_);
-        auto prog =  mesh_actor->program();
-        prog->use();
-        prog->setUniformInt("primitive_type", 0);
-        prog->setUniformInt("use_vcolor", 1);
+        program_->use();
+        program_->setUniformInt("primitive_type", 0);
+        program_->setUniformInt("use_vcolor", 1);
         //program_->setUniformVec4("user_color", user_color_);
         sphere_->draw();
     }
-    mesh_actor_->draw();
+    if(mesh_actor_)
+        mesh_actor_->draw();
 }
 
 void glmMeshRenderer::resize(float width, float height)
 {
-    spdlog::info("glmMeshRenderer resize!");
+    //spdlog::info("glmMeshRenderer resize!");
     glViewport(0, 0, (int)width, (int)height);
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->setRendererSize(width, height);
+    render_size_ = {width, height};
 }
 
 GLMESH_NAMESPACE_END

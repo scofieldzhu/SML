@@ -42,16 +42,15 @@ public:
     virtual void draw() = 0;    
     virtual bool createSource() = 0;
     const glmMeshRendererList& renderers()const{ return renderers_; }
-    void setMatrix(glmMatrixPtr matrix){ matrix_ = matrix; }
-    glmMatrixPtr matrix() const{ return matrix_; }
-    virtual void addToRenderer(glmMeshRendererPtr ren);
+    void setMatrix(const glmMatrix& matrix){ matrix_ = matrix; }
+    const auto& matrix() const{ return matrix_; }
+    virtual bool addToRenderer(glmMeshRendererPtr ren);
     virtual void removeFromRenderer(glmMeshRendererPtr ren);
     virtual ~glmActor();
 
 protected:
-    
     glmActor();
-    glmMatrixPtr matrix_;
+    glmMatrix matrix_;
     glmMeshRendererList renderers_;
 };
 

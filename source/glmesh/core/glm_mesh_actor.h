@@ -41,20 +41,16 @@ class GLMESH_API glmMeshActor : public glmActor, public glmInstantiator<glmMeshA
 {
 public:
     auto currentMeshCloud()const{ return cur_mesh_cloud_; }
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
+    void setMeshCloud(glmMeshPtr mesh_cloud);
     void draw() override;
     bool createSource() override;
     void setUserColor(const glm::vec4& color);
     void destroy();
-    void setRendererSize(float w, float h);
     void setDispalyMode(glmDisplayMode m);
     auto displayMode()const{ return display_mode_; }
     auto program()const{ return program_; }
-    void setModelMat(const glm::mat4& mat);
-    glm::mat4 modelMat(){ return model_; }
-    void setCameraFovy(float fovy);
-    float cameraFovy()const{ return fovy_; }
-    glmMeshActor();
+    bool addToRenderer(glmMeshRendererPtr ren) override;
+    glmMeshActor(glmShaderProgramPtr prog);
     ~glmMeshActor();
 
 private:
@@ -66,16 +62,6 @@ private:
     glmBufferPtr indices_buffer_;
     glmVertexArrayPtr vao_;
     glmShaderProgramPtr program_;
-    glm::mat4 model_;
-    glm::mat4 view_;
-    glm::vec3 eye_ = glm::vec3(0.0f, 0.0f, 1.0f);
-    glm::vec3 focal_point_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 viewup_ = glm::vec3(0.0f, 1.0f, 0.0f);
-    float win_aspect_ = 1.0f;
-    float near_plane_dist_ = 0.0f;
-    float far_plane_dist_ = 2.0f;
-    float fovy_ = 45.0f;
-    glm::mat4 projection_;
     glmDisplayMode display_mode_ = glmDisplayMode::kPoint;
 };
 

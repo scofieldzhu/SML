@@ -60,15 +60,24 @@
  */
 
 #include "glm_actor.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <spdlog/spdlog.h>
 
 GLMESH_NAMESPACE_BEGIN
 
 glmActor::glmActor()
+    :matrix_(glm::identity<glm::mat4>())
 {
 }
 
-void glmActor::addToRenderer(glmMeshRendererPtr ren)
+bool glmActor::addToRenderer(glmMeshRendererPtr ren)
 {
+    if(ren == nullptr){
+        spdlog::error("Null renderer pointer!");
+        return false;
+    }
+    renderers_.push_back(ren);
+    return true;
 }
 
 void glmActor::removeFromRenderer(glmMeshRendererPtr ren)

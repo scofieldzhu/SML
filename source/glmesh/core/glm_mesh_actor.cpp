@@ -1,4 +1,3 @@
-#include "glm_mesh_actor.h"
 /* 
  *  glmesh is a mesh data render library base on QOpengl.
  *  glmesh provides object-oriented interfaces to the OpenGL API (3.0 and higher). 
@@ -41,6 +40,8 @@
 #include "glm_vertex_array_attrib.h"
 #include "glm_shader_source.h"
 #include "glm_mesh.h"
+#include "glm_mesh_renderer.h"
+#include "glm_camera.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -53,7 +54,8 @@ namespace{
   };
 }
 
-glmMeshActor::glmMeshActor()
+glmMeshActor::glmMeshActor(glmShaderProgramPtr prog)
+    :program_(prog)
 {
 }
 
@@ -62,59 +64,54 @@ glmMeshActor::~glmMeshActor()
     destroy();
 }
 
-void glmMeshActor::setModelMat(const glm::mat4 &mat)
-{
-    model_ = mat; 
-    program_->use();
-    program_->setUniformMatrix4fv("model", model_);
-}
-
-void glmMeshActor::setCameraFovy(float fovy)
-{
-    fovy_ = fovy;
-    program_->use();
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
-}
-
-void glmMeshActor::loadMeshCloud(glmMeshPtr mesh_cloud)
+void glmMeshActor::setMeshCloud(glmMeshPtr mesh_cloud)
 {
     if(mesh_cloud.get() == cur_mesh_cloud_.get()){
         spdlog::warn("The same mesh cloud has been loaded!");
         return;
     }
     cur_mesh_cloud_ = mesh_cloud;
-    if(mesh_cloud->valid()){
+    if(!mesh_cloud->valid()){
         spdlog::warn("Mesh cloud contain a empty vertex list!");
         return;
     }
-    program_->use();
+}
+
+bool glmMeshActor::addToRenderer(glmMeshRendererPtr ren)
+{
+    if(!glmActor::addToRenderer(ren))
+        return false;
+    if(!cur_mesh_cloud_->valid()){
+        spdlog::error("Invalid mesh cloud data!!");
+        return false;
+    }
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
     glm::vec3 center_point = cur_mesh_cloud_->calcCenterPoint();
     float diagonal_len = boundingbox.calcDiagonalLength();
     spdlog::info("diagonal_len:{} center_point:{}", diagonal_len, Vec3ToStr(center_point));
-    //translate center of point cloud to origin point {0.0, 0.0, 0.0}
-    model_ = glm::translate(glm::mat4(1.0), -center_point);
-    program_->setUniformMatrix4fv("model", model_);
-    eye_ = {0.0f, 0.0f, diagonal_len * 1.6f};
-    view_  = glm::lookAt(eye_, focal_point_, viewup_);
-    program_->setUniformMatrix4fv("view", view_);
-    far_plane_dist_ = eye_[2];
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);    
-    program_->setUniformMatrix4fv("projection", projection_);
+    matrix_ = glm::translate(glm::mat4(1.0), -center_point);
+    auto ren_camera = ren->activeCamera();
+    ren_camera->setModel(matrix_);
+    ren_camera->setEye({0.0f, 0.0f, diagonal_len * 1.6f});
+    ren_camera->setFarPlaneDist(ren_camera->eye()[2]);
+    ren_camera->setWinAspect(ren->renderSize()[0] / ren->renderSize()[1]);
+    return createSource();
+}
 
+bool glmMeshActor::createSource()
+{
     buffer_ = nullptr; //release old buffer
     buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
-    uint32_t vbs = mesh_cloud->calcByteSizeOfVertices();
-    uint32_t cbs = mesh_cloud->calcByteSizeOfColors();
-    uint32_t nbs = mesh_cloud->calcByteSizeOfNormals();
+    uint32_t vbs = cur_mesh_cloud_->calcByteSizeOfVertices();
+    uint32_t cbs = cur_mesh_cloud_->calcByteSizeOfColors();
+    uint32_t nbs = cur_mesh_cloud_->calcByteSizeOfNormals();
     uint32_t total_byte_size = vbs + cbs + nbs;
     buffer_->allocate(total_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-    buffer_->allocateSub(0, vbs, mesh_cloud->vertices.data());
+    buffer_->allocateSub(0, vbs, cur_mesh_cloud_->vertices.data());
     if(cbs)
-        buffer_->allocateSub(vbs, cbs, mesh_cloud->colors.data());
+        buffer_->allocateSub(vbs, cbs, cur_mesh_cloud_->colors.data());
     if(nbs)
-        buffer_->allocateSub(vbs + cbs, nbs, mesh_cloud->normals.data());
+        buffer_->allocateSub(vbs + cbs, nbs, cur_mesh_cloud_->normals.data());
     
     vao_ = nullptr; //release old vao
     vao_ = std::make_shared<glmVertexArray>();
@@ -122,58 +119,28 @@ void glmMeshActor::loadMeshCloud(glmMeshPtr mesh_cloud)
     vao_->bindBuffer(*buffer_);
     
     indices_buffer_ = nullptr; //release old indices buffer
-    if(mesh_cloud->existFacetData()){        
+    if(cur_mesh_cloud_->existFacetData()){        
         indices_buffer_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
-        auto indices_data_mb = mesh_cloud->allocMemoryOfFacets();
+        auto indices_data_mb = cur_mesh_cloud_->allocMemoryOfFacets();
         indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
         vao_->bindBuffer(*indices_buffer_);
     }
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     vao_->getAttrib(0)->enable();
-    if(mesh_cloud->colors.empty()){
-        program_->setUniformInt("use_vcolor", 0);
-        program_->setUniformVec4("user_color", user_color_);
-    }else{
-        program_->setUniformInt("use_vcolor", 1);        
+    if(!cur_mesh_cloud_->colors.empty()){              
         vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs));
         vao_->getAttrib(1)->enable();
     }
-    if(mesh_cloud->normals.empty()){
-        program_->setUniformInt("use_vnormal", 0);
-        program_->setUniformVec3("user_normal", user_normal_);
-    }else{
-        program_->setUniformInt("use_vnormal", 1);        
+    if(!cur_mesh_cloud_->normals.empty()){       
         vao_->getAttrib(2)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs + cbs));
         vao_->getAttrib(2)->enable();
     }    
-}
-
-bool glmMeshActor::createSource()
-{
-    program_ = glmShaderProgram::New();
-    if(!program_->addShaderSource(ShaderSource::kVertexShaderSource, GL_VERTEX_SHADER))
-        return false;
-    if(!program_->addShaderSource(ShaderSource::kFragmentShaderSource, GL_FRAGMENT_SHADER))
-        return false;
-    if(!program_->link())
-        return false;
-    program_->use();
-
-    model_ = glm::identity<glm::mat4>();
-    program_->setUniformMatrix4fv("model", model_);
-    view_  = glm::lookAt(eye_, focal_point_, viewup_);
-    program_->setUniformMatrix4fv("view", view_);
-    win_aspect_ = renderer_width_ / renderer_height_;
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->setUniformMatrix4fv("projection", projection_);
     return true;
 }
 
 void glmMeshActor::setUserColor(const glm::vec4 &color)
 {
     user_color_ = color;
-    program_->use();
-    program_->setUniformVec4("user_color", user_color_);
 }
 
 void glmMeshActor::destroy()
@@ -184,18 +151,6 @@ void glmMeshActor::destroy()
     vao_.reset();
 }
 
-void glmMeshActor::setRendererSize(float w, float h)
-{
-    renderer_width_  = w;
-    renderer_height_ = h;
-    if(program_ == nullptr)
-        return;
-    win_aspect_ = w / h;
-    projection_ = glm::perspective(glm::radians(fovy_), win_aspect_, near_plane_dist_, far_plane_dist_);
-    program_->use();
-    program_->setUniformMatrix4fv("projection", projection_);
-}
-
 void glmMeshActor::setDispalyMode(glmDisplayMode m)
 {
     display_mode_ = m;
@@ -203,24 +158,39 @@ void glmMeshActor::setDispalyMode(glmDisplayMode m)
 
 void glmMeshActor::draw()
 {
-    if(vao_){
-        //glEnable(GL_DEPTH_TEST);
-        program_->use();
-        program_->setUniformInt("primitive_type", 1);
-        vao_->bindCurrent();
-        auto gl_mode = stDisplayModeDict[display_mode_];
-        glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
-        if(gl_mode == GL_POINTS){
-            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
-        }else{            
-            if(cur_mesh_cloud_->existFacetData()){
-                if(cur_mesh_cloud_->isTriangulated()){
-                    glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
-                }else{
-                    glEnable(GL_PRIMITIVE_RESTART);
-                    glPrimitiveRestartIndex(glmMesh::kPolyRestartIndex);
-                    glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
-                }
+    if(vao_ == nullptr || renderers_.empty() || cur_mesh_cloud_ == nullptr || !cur_mesh_cloud_->valid()){
+        return;
+    }
+    program_->use();
+    vao_->bindCurrent();
+    auto ren_camera = renderers_[0]->activeCamera();
+    ren_camera->recalc();
+    ren_camera->syncDataToShader(program_);
+    program_->setUniformInt("primitive_type", 1);
+    if(cur_mesh_cloud_->colors.empty()){
+        program_->setUniformInt("use_vcolor", 0);
+        program_->setUniformVec4("user_color", user_color_);
+    }else{
+        program_->setUniformInt("use_vcolor", 1);        
+    }
+    if(cur_mesh_cloud_->normals.empty()){
+        program_->setUniformInt("use_vnormal", 0);
+        program_->setUniformVec3("user_normal", user_normal_);
+    }else{
+        program_->setUniformInt("use_vnormal", 1);        
+    } 
+    auto gl_mode = stDisplayModeDict[display_mode_];
+    glPolygonMode(GL_FRONT_AND_BACK, gl_mode);
+    if(gl_mode == GL_POINTS){
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(cur_mesh_cloud_->vertices.size()));
+    }else{            
+        if(cur_mesh_cloud_->existFacetData()){
+            if(cur_mesh_cloud_->isTriangulated()){
+                glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
+            }else{
+                glEnable(GL_PRIMITIVE_RESTART);
+                glPrimitiveRestartIndex(glmMesh::kPolyRestartIndex);
+                glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(cur_mesh_cloud_->calcIndiceCount()), GL_UNSIGNED_INT, nullptr);
             }
         }
     }
