@@ -38,15 +38,15 @@ GLMESH_NAMESPACE_BEGIN
 
 class glmBkgActor : public glmActor, public glmInstantiator<glmBkgActor>
 {
-public:
-    bool createSource() override;
-    void draw() override;
+public:    
+    void draw(glmMeshRenderer* ren) override;
     void setTopColor(const glm::vec3& clr);
     void setBottomColor(const glm::vec3& clr);
     glmBkgActor();
     ~glmBkgActor();
 
 private:
+    bool createSource(glmMeshRenderer* ren) override;
     glm::vec3 top_color_ = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 bottom_color_ = glm::vec3(0.5f, 0.5f, 1.0f);
     glmShaderProgramPtr program_;

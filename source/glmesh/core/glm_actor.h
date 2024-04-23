@@ -39,8 +39,7 @@ GLMESH_NAMESPACE_BEGIN
 class GLMESH_API glmActor
 {
 public:
-    virtual void draw() = 0;    
-    virtual bool createSource() = 0;
+    virtual void draw(glmMeshRenderer* ren) = 0;        
     const glmMeshRendererList& renderers()const{ return renderers_; }
     void setMatrix(const glmMatrix& matrix){ matrix_ = matrix; }
     const auto& matrix() const{ return matrix_; }
@@ -49,9 +48,11 @@ public:
     virtual ~glmActor();
 
 protected:
+    virtual bool createSource(glmMeshRenderer* ren) = 0;
     glmActor();
     glmMatrix matrix_;
     glmMeshRendererList renderers_;
+    bool source_created_ = false;
 };
 
 GLMESH_NAMESPACE_END

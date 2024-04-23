@@ -78,18 +78,8 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
     mesh_actor_->addToRenderer(shared_from_this());
 }
 
-void glmMeshRenderer::setUserColor(const glm::vec4 &color)
-{
-    if(mesh_actor_)
-        mesh_actor_->setUserColor(color);
-}
-
 bool glmMeshRenderer::initialize(float width, float height)
 {
-    if(initialized_){
-        spdlog::warn("Already initialized!");
-        return true;
-    }
     if(!gladLoadGL()){
         spdlog::error("gladLoadGL failed!");
         return false;
@@ -104,8 +94,7 @@ bool glmMeshRenderer::initialize(float width, float height)
         return false;
     program_->use();
 
-    bkg_->createSource();
-    initialized_ = true;
+    bkg_->addToRenderer(this->shared_from_this());
 
     // sphere_ = glmSphereActor::New();
     // sphere_->setShaderProgram(program_);
@@ -119,25 +108,20 @@ void glmMeshRenderer::destroy()
     mesh_actor_.reset();
 }
 
-void glmMeshRenderer::setDispalyMode(glmDisplayMode m)
-{
-    std::dynamic_pointer_cast<glmMeshActor>(mesh_actor_)->setDispalyMode(m);
-}
-
 void glmMeshRenderer::render()
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
-    bkg_->draw();
+    bkg_->draw(this);
     if(sphere_){
         program_->use();
         program_->setUniformInt("primitive_type", 0);
         program_->setUniformInt("use_vcolor", 1);
         //program_->setUniformVec4("user_color", user_color_);
-        sphere_->draw();
+        sphere_->draw(this);
     }
     if(mesh_actor_)
-        mesh_actor_->draw();
+        mesh_actor_->draw(this);
 }
 
 void glmMeshRenderer::resize(float width, float height)

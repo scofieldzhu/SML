@@ -45,7 +45,7 @@ glmBkgActor::~glmBkgActor()
 {
 }
 
-bool glmBkgActor::createSource()
+bool glmBkgActor::createSource(glmMeshRenderer* ren)
 {
     program_ = glmShaderProgram::New();
     if(!program_->addShaderSource(ShaderSource::kBkgVertexShaderSource, GL_VERTEX_SHADER))
@@ -74,7 +74,7 @@ bool glmBkgActor::createSource()
     return true;
 }
 
-void glmBkgActor::draw()
+void glmBkgActor::draw(glmMeshRenderer* ren)
 {
     if(program_){
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

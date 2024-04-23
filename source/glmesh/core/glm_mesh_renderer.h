@@ -31,7 +31,6 @@
 #ifndef __glm_mesh_renderer_h__
 #define __glm_mesh_renderer_h__
 
-#include <glm/gtx/quaternion.hpp>
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
 #include "glmesh/core/glm_instantiator.h"
@@ -45,14 +44,10 @@ public:
     void setBackgroudBottomColor(const glm::vec3& color);
     glmMeshPtr currentMeshCloud()const;
     void loadMeshCloud(glmMeshPtr mesh_cloud);
-    void setUserColor(const glm::vec4& color);
     bool initialize(float width, float height);
     void destroy();
     void resize(float width, float height);
     glm::vec2 renderSize()const{ return render_size_; }
-    void setDispalyMode(glmDisplayMode m);
-    auto displayMode()const;
-    void resetView();
     void render();
     auto meshActor(){ return mesh_actor_; }
     auto bkgActor(){ return bkg_; }
@@ -68,7 +63,6 @@ private:
     glmBkgActorPtr bkg_;
     glmMeshActorPtr mesh_actor_;
     glm::vec2 render_size_;
-    bool initialized_ = false;
 };
 
 GLMESH_NAMESPACE_END

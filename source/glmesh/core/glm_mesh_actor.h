@@ -42,18 +42,17 @@ class GLMESH_API glmMeshActor : public glmActor, public glmInstantiator<glmMeshA
 public:
     auto currentMeshCloud()const{ return cur_mesh_cloud_; }
     void setMeshCloud(glmMeshPtr mesh_cloud);
-    void draw() override;
-    bool createSource() override;
+    void draw(glmMeshRenderer* ren) override;
     void setUserColor(const glm::vec4& color);
     void destroy();
     void setDispalyMode(glmDisplayMode m);
     auto displayMode()const{ return display_mode_; }
     auto program()const{ return program_; }
-    bool addToRenderer(glmMeshRendererPtr ren) override;
     glmMeshActor(glmShaderProgramPtr prog);
     ~glmMeshActor();
 
 private:
+    bool createSource(glmMeshRenderer* ren) override;
     float renderer_width_ = 0.0f, renderer_height_ = 0.0f;
     glm::vec4 user_color_ = glm::vec4(1.0, 1.0, 0.0, 1.0);
     glm::vec3 user_normal_ = glm::vec3(0.0f, 0.0f, 1.0f);

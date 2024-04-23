@@ -63,7 +63,7 @@ void glmSphereActor::setShaderProgram(glmShaderProgramPtr shader_program)
     shader_program_ = shader_program;
 }
 
-void glmSphereActor::draw()
+void glmSphereActor::draw(glmMeshRenderer* ren)
 {
     // if(shader_program_ == nullptr){
     //     spdlog::warn("shader program is not set.");
@@ -75,7 +75,7 @@ void glmSphereActor::draw()
     glDrawElements(GL_TRIANGLE_STRIP, static_cast<GLsizei>(indices_.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-bool glmSphereActor::createSource()
+bool glmSphereActor::createSource(glmMeshRenderer* ren)
 {
     vao_ = glmVertexArray::New();
     vao_->bindCurrent();

@@ -70,11 +70,22 @@ glmActor::glmActor()
 {
 }
 
+glmActor::~glmActor()
+{    
+}
+
 bool glmActor::addToRenderer(glmMeshRendererPtr ren)
 {
     if(ren == nullptr){
         spdlog::error("Null renderer pointer!");
         return false;
+    }
+    if(!source_created_){
+        if(!createSource(ren.get())){
+            spdlog::error("Create source failed!");
+            return false;
+        }
+        source_created_ = true;        
     }
     renderers_.push_back(ren);
     return true;
@@ -82,10 +93,6 @@ bool glmActor::addToRenderer(glmMeshRendererPtr ren)
 
 void glmActor::removeFromRenderer(glmMeshRendererPtr ren)
 {
-}
-
-glmActor::~glmActor()
-{    
 }
 
 GLMESH_NAMESPACE_END

@@ -35,6 +35,7 @@
 #include <spdlog/spdlog.h>
 #include "glmesh/core/glm_trackball.h"
 #include "glmesh/core/glm_mesh_renderer.h"
+#include "glmesh/core/glm_mesh_actor.h"
 
 using namespace glmesh;
 
@@ -115,6 +116,7 @@ void RenderWindow::mousePressEvent(QMouseEvent* event)
     publish(target_event);
     update();
 }
+
 
 void RenderWindow::initializeGL() 
 {

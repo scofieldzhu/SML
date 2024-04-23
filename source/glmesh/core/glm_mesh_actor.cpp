@@ -77,10 +77,8 @@ void glmMeshActor::setMeshCloud(glmMeshPtr mesh_cloud)
     }
 }
 
-bool glmMeshActor::addToRenderer(glmMeshRendererPtr ren)
+bool glmMeshActor::createSource(glmMeshRenderer* ren)
 {
-    if(!glmActor::addToRenderer(ren))
-        return false;
     if(!cur_mesh_cloud_->valid()){
         spdlog::error("Invalid mesh cloud data!!");
         return false;
@@ -95,11 +93,7 @@ bool glmMeshActor::addToRenderer(glmMeshRendererPtr ren)
     ren_camera->setEye({0.0f, 0.0f, diagonal_len * 1.6f});
     ren_camera->setFarPlaneDist(ren_camera->eye()[2]);
     ren_camera->setWinAspect(ren->renderSize()[0] / ren->renderSize()[1]);
-    return createSource();
-}
 
-bool glmMeshActor::createSource()
-{
     buffer_ = nullptr; //release old buffer
     buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
     uint32_t vbs = cur_mesh_cloud_->calcByteSizeOfVertices();
@@ -156,7 +150,7 @@ void glmMeshActor::setDispalyMode(glmDisplayMode m)
     display_mode_ = m;
 }
 
-void glmMeshActor::draw()
+void glmMeshActor::draw(glmMeshRenderer* ren)
 {
     if(vao_ == nullptr || renderers_.empty() || cur_mesh_cloud_ == nullptr || !cur_mesh_cloud_->valid()){
         return;

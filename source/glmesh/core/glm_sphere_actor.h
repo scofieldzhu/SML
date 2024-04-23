@@ -38,8 +38,7 @@ GLMESH_NAMESPACE_BEGIN
 class GLMESH_API glmSphereActor : public glmActor, public glmInstantiator<glmSphereActor>
 {
 public:
-    void draw() override;
-    bool createSource() override;
+    void draw(glmMeshRenderer* ren) override;    
     void setLongitudeResolution(uint32_t res);
     uint32_t longitudeResolution() const{ return longi_res_; }
     void setLatitudeResolution(uint32_t res);
@@ -57,6 +56,7 @@ public:
     ~glmSphereActor();
 
 private:
+    bool createSource(glmMeshRenderer* ren) override;
     glm::vec3 center_ = glm::vec3(0.0f, 0.0f, 0.0f);
     float radius_ = 1.0f;
     glm::vec3 color_ = glm::vec3(1.0f, 1.0f, 1.0f);
