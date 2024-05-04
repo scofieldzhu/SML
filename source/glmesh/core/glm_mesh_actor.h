@@ -42,6 +42,7 @@ class GLMESH_API glmMeshActor : public glmActor, public glmInstantiator<glmMeshA
 public:
     auto currentMeshCloud()const{ return cur_mesh_cloud_; }
     void setMeshCloud(glmMeshPtr mesh_cloud);
+    void updateMeshCloud(glmMeshPtr mesh_cloud);
     void draw(glmMeshRenderer* ren) override;
     void setUserColor(const glm::vec4& color);
     void destroy();

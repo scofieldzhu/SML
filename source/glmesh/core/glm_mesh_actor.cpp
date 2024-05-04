@@ -52,6 +52,8 @@ namespace{
     {glmDisplayMode::kWire, GL_LINE},
     {glmDisplayMode::kFacet, GL_FILL}
   };
+
+  constexpr size_t kMaxGLBufferSize = 50 * 1024 * 1024;
 }
 
 glmMeshActor::glmMeshActor(glmShaderProgramPtr prog)
@@ -77,10 +79,20 @@ void glmMeshActor::setMeshCloud(glmMeshPtr mesh_cloud)
     }
 }
 
+void glmMeshActor::updateMeshCloud(glmMeshPtr mesh_cloud)
+{
+
+}
+
 bool glmMeshActor::createSource(glmMeshRenderer* ren)
 {
     if(!cur_mesh_cloud_->valid()){
         spdlog::error("Invalid mesh cloud data!!");
+        return false;
+    }
+    auto mesh_byte_size = cur_mesh_cloud_->calcSize();
+    if(mesh_byte_size > kMaxGLBufferSize){
+        spdlog::error("Too large mesh byte size more than maximum value:{} of GL render!", kMaxGLBufferSize);
         return false;
     }
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
