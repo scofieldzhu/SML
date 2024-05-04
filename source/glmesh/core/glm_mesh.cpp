@@ -73,6 +73,11 @@ uint32_t glmMesh::calcByteSizeOfNormals() const
     return sizeof(glmNormal) * static_cast<uint32_t>(normals.size());
 }
 
+uint32_t glmMesh::calcSize() const
+{
+    return calcByteSizeOfVertices() + calcByteSizeOfColors() + calcByteSizeOfNormals();
+}
+
 uint32_t glmMesh::calcIndiceCount() const
 {
     if(!triangle_facets.empty()){

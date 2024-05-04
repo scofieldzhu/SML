@@ -21,9 +21,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${build_bin})
 # add third parties directory to search path list
 list(APPEND CMAKE_PREFIX_PATH ${trd_root})
 find_package(spdlog REQUIRED)
-find_package(globjects REQUIRED)
-find_package(glbinding REQUIRED)
+# find_package(globjects REQUIRED)
+# find_package(glbinding REQUIRED)
 find_package(glm REQUIRED)
+
+add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/source

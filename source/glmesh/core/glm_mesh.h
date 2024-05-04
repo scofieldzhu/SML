@@ -47,6 +47,7 @@ struct GLMESH_API glmMesh : public glmObject<glmMesh>
     uint32_t calcByteSizeOfVertices()const; 
     uint32_t calcByteSizeOfColors()const; 
     uint32_t calcByteSizeOfNormals()const; 
+    uint32_t calcSize()const;
     uint32_t calcIndiceCount()const;
     bool isTriangulated()const{ return !triangle_facets.empty(); }
     bool existFacetData()const{ return triangle_facets.size() || poly_facets.size(); }
