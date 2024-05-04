@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_mesh_renderer.h 
+ *  File: glm_sphere_actor.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,41 +28,48 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_mesh_renderer_h__
-#define __glm_mesh_renderer_h__
+#ifndef __glm_sphere_actor_h__
+#define __glm_sphere_actor_h__
 
-#include "glmesh/core/glm_base_type.h"
-#include "glmesh/core/glm_export.h"
+#include "glmesh/core/glm_actor.h"
 #include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmMeshRenderer : public glmInstantiator<glmMeshRenderer>, public std::enable_shared_from_this<glmMeshRenderer>
+class GLMESH_API glmSphereActor : public glmActor, public glmInstantiator<glmSphereActor>
 {
 public:
-    void setBackgroudTopColor(const glm::vec3& color);
-    void setBackgroudBottomColor(const glm::vec3& color);
-    glmMeshPtr currentMeshCloud()const;
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
-    bool initialize(float width, float height);
-    void destroy();
-    void resize(float width, float height);
-    glm::vec2 renderSize()const{ return render_size_; }
-    void render();
-    auto meshActor(){ return mesh_actor_; }
-    auto bkgActor(){ return bkg_; }
-    glmCameraPtr activeCamera(){ return camera_; }
-    glmMeshRenderer();
-    ~glmMeshRenderer();
+    void draw(glmMeshRenderer* ren) override;    
+    void setLongitudeResolution(uint32_t res);
+    uint32_t longitudeResolution() const{ return longi_res_; }
+    void setLatitudeResolution(uint32_t res);
+    uint32_t latitudeResolution() const{ return latit_res_; }
+    void setCenter(const glmPt3& center);    
+    const auto& center() const{ return center_; }
+    void setRadius(float radius);
+    float radius() const{ return radius_; }
+    void setColor(const glmClr3& color);
+    const auto& color() const{ return color_; }
+    void setShaderProgram(glmShaderProgramPtr shader_program);
+    glmShaderProgramPtr shaderProgram() const{ return shader_program_; }
+    glmSphereActor();
+    glmSphereActor(const glmPt3& center, float radius);
+    ~glmSphereActor();
 
 private:
-    void syncCameraToShader();
-    glmShaderProgramPtr program_;
-    glmCameraPtr camera_;
-    glmSpherePtr sphere_;
-    glmBkgActorPtr bkg_;
-    glmMeshActorPtr mesh_actor_;
-    glm::vec2 render_size_;
+    bool createSource(glmMeshRenderer* ren) override;
+    glmPt3 center_ = glmPt3(0.0f, 0.0f, 0.0f);
+    float radius_ = 1.0f;
+    glmClr3 color_ = glmClr3(1.0f, 1.0f, 1.0f);
+    uint32_t longi_res_ = 180;
+    uint32_t latit_res_ = 90;
+    glmShaderProgramPtr shader_program_ = nullptr;
+    glmVertexArrayPtr vao_ = nullptr;
+    glmBufferPtr vbo_ = nullptr;
+    glmBufferPtr ebo_ = nullptr;
+    glmVertexList vertexes_;
+    glmColorList colors_;
+    glmIndices indices_;
 };
 
 GLMESH_NAMESPACE_END

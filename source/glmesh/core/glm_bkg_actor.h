@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_object.h 
+ *  File: glm_bkg_actor.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,25 +28,32 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_object_h__
-#define __glm_object_h__
+#ifndef __glm_bkg_actor_h__
+#define __glm_bkg_actor_h__
 
-#include <memory>
-#include "glmesh/core/glm_nsp.h"
+#include "glmesh/core/glm_actor.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-template <class D>
-class glmObject
+class glmBkgActor : public glmActor, public glmInstantiator<glmBkgActor>
 {
-public: 
-    template <typename... Args>
-    static std::shared_ptr<D> New(Args&&... args)
-    {
-        return std::make_shared<D>(std::forward<Args>(args)...);
-    }
+public:    
+    void draw(glmMeshRenderer* ren) override;
+    void setTopColor(const glm::vec3& clr);
+    void setBottomColor(const glm::vec3& clr);
+    glmBkgActor();
+    ~glmBkgActor();
+
+private:
+    bool createSource(glmMeshRenderer* ren) override;
+    glm::vec3 top_color_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 bottom_color_ = glm::vec3(0.5f, 0.5f, 1.0f);
+    glmShaderProgramPtr program_;
+    glmVertexArrayPtr vao_;
+    glmBufferPtr vertex_buffer_;
 };
 
 GLMESH_NAMESPACE_END
 
-#endif
+#endif // __glm_bkg_actor_h__

@@ -34,11 +34,11 @@
 #include <map>
 #include "glmesh/core/glm_vertex_array_attrib.h"
 #include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmVertexArray : public glmObject<glmVertexArray>
+class GLMESH_API glmVertexArray : public glmInstantiator<glmVertexArray>
 {
 public:
     void bindCurrent();

@@ -47,13 +47,18 @@ static constexpr size_t kIndexTypeSize = sizeof(glmIndex);
 using glmVertex = glm::vec3;
 static constexpr size_t kVertexTypeSize = sizeof(glmVertex);
 using glmVertexList = std::vector<glmVertex>;
+inline size_t CalcBytesOfVertexList(const glmVertexList& vl){ return vl.size() * kVertexTypeSize; }
+
+using glmPt3 = glm::vec3;
 
 using glmNormal = glm::vec3;    
 using glmNormalList = std::vector<glmNormal>;
 
-using glmColor = glm::vec4;
-static constexpr size_t kColorTypeSize = sizeof(glmColor);
-using glmColorList = std::vector<glmColor>;
+using glmClr = glm::vec4;
+static constexpr size_t kColorTypeSize = sizeof(glmClr);
+using glmColorList = std::vector<glmClr>;
+
+using glmClr3 = glm::vec3;
 
 using glmTriangleFacet = glm::u32vec3;
 using TriangleFacetList = std::vector<glmTriangleFacet>;
@@ -79,13 +84,28 @@ using glmShaderProgramPtr = std::shared_ptr<glmShaderProgram>;
 
 class glmMeshRenderer;
 using glmMeshRendererPtr = std::shared_ptr<glmMeshRenderer>;
+using glmMeshRendererList = std::vector<glmMeshRendererPtr>;
+
+using glmMatrix = glm::mat4;
 
 class glmWinEventHandler;
 
 class glmTrackball;
 
-class glmSphere;
-using glmSpherePtr = std::shared_ptr<glmSphere>;
+class glmActor;
+using glmActorPtr = std::shared_ptr<glmActor>;
+
+class glmBkgActor;
+using glmBkgActorPtr = std::shared_ptr<glmBkgActor>;
+
+class glmSphereActor;
+using glmSpherePtr = std::shared_ptr<glmSphereActor>;
+
+class glmMeshActor;
+using glmMeshActorPtr = std::shared_ptr<glmMeshActor>;
+
+class glmCamera;
+using glmCameraPtr = std::shared_ptr<glmCamera>;
 
 struct glmBoundingBox
 {

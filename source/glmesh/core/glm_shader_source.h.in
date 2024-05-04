@@ -1,8 +1,8 @@
 #pragma once
 
 namespace ShaderSource {
-    const char* kVertexShaderSource = R"(@VERTEX_SHADER_SOURCE@)";
-    const char* kBkgVertexShaderSource = R"(@BKG_VERTEX_SHADER_SOURCE@)";
-    const char* kFragmentShaderSource = R"(@FRAGMENT_SHADER_SOURCE@)";
-    const char* kBkgFragmentShaderSource = R"(@BKG_FRAGMENT_SHADER_SOURCE@)";
+    static const char* kVertexShaderSource = R"(@VERTEX_SHADER_SOURCE@)";
+    static const char* kBkgVertexShaderSource = R"(@BKG_VERTEX_SHADER_SOURCE@)";
+    static const char* kFragmentShaderSource = R"(@FRAGMENT_SHADER_SOURCE@)";
+    static const char* kBkgFragmentShaderSource = R"(@BKG_FRAGMENT_SHADER_SOURCE@)";
 }

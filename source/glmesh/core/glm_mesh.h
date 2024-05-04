@@ -33,14 +33,14 @@
 
 #include "glmesh/core/glm_memory_block.h"
 #include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-struct GLMESH_API glmMesh : public glmObject<glmMesh>
+struct GLMESH_API glmMesh : public glmInstantiator<glmMesh>
 {
     static constexpr glmIndex kPolyRestartIndex = 0xFFFFFFFF;    
-    bool valid()const{ return vertices.empty(); }
+    bool valid()const{ return !vertices.empty(); }
     glmMemoryBlockPtr allocMemoryOfFacets();
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;

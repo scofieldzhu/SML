@@ -33,11 +33,11 @@
 
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_object.h"
+#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-struct GLMESH_API glmMemoryBlock : public glmObject<glmMemoryBlock>
+struct GLMESH_API glmMemoryBlock : public glmInstantiator<glmMemoryBlock>
 {
     const char* blockData()const{ return block_data_; }
     char* blockData(){ return block_data_; }

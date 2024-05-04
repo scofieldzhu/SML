@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ShaderSource {
-    const char* kVertexShaderSource = R"(#version 400 core
+    static const char* kVertexShaderSource = R"(#version 400 core
 
 uniform mat4 model;
 uniform mat4 view;
@@ -34,7 +34,7 @@ void main()
         out_color = user_color;
     }        
 })";
-    const char* kBkgVertexShaderSource = R"(#version 400 core
+    static const char* kBkgVertexShaderSource = R"(#version 400 core
 
 layout (location = 0) in vec3 vertex_pos; 
 layout (location = 1) in vec3 vertex_color;
@@ -46,7 +46,7 @@ void main()
     gl_Position = vec4(vertex_pos, 1.0);
     out_color = vertex_color;
 })";
-    const char* kFragmentShaderSource = R"(#version 450 core
+    static const char* kFragmentShaderSource = R"(#version 450 core
 
 in vec4 out_color;
 out vec4 frag_color;
@@ -55,7 +55,7 @@ void main()
 {
     frag_color = out_color;
 })";
-    const char* kBkgFragmentShaderSource = R"(#version 450 core
+    static const char* kBkgFragmentShaderSource = R"(#version 450 core
 
 out vec4 frag_color;
 

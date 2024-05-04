@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_mesh_renderer.h 
+ *  File: glm_actor.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,43 +28,35 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_mesh_renderer_h__
-#define __glm_mesh_renderer_h__
+#ifndef __glm_actor_h__
+#define __glm_actor_h__
 
 #include "glmesh/core/glm_base_type.h"
 #include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmMeshRenderer : public glmInstantiator<glmMeshRenderer>, public std::enable_shared_from_this<glmMeshRenderer>
+class GLMESH_API glmActor
 {
 public:
-    void setBackgroudTopColor(const glm::vec3& color);
-    void setBackgroudBottomColor(const glm::vec3& color);
-    glmMeshPtr currentMeshCloud()const;
-    void loadMeshCloud(glmMeshPtr mesh_cloud);
-    bool initialize(float width, float height);
-    void destroy();
-    void resize(float width, float height);
-    glm::vec2 renderSize()const{ return render_size_; }
-    void render();
-    auto meshActor(){ return mesh_actor_; }
-    auto bkgActor(){ return bkg_; }
-    glmCameraPtr activeCamera(){ return camera_; }
-    glmMeshRenderer();
-    ~glmMeshRenderer();
+    virtual void draw(glmMeshRenderer* ren) = 0;        
+    const glmMeshRendererList& renderers()const{ return renderers_; }
+    void setMatrix(const glmMatrix& matrix){ matrix_ = matrix; }
+    const auto& matrix() const{ return matrix_; }
+    virtual bool addToRenderer(glmMeshRendererPtr ren);
+    bool existRenderer()const;
+    virtual void removeFromRenderer(glmMeshRendererPtr ren);
+    virtual ~glmActor();
 
-private:
-    void syncCameraToShader();
-    glmShaderProgramPtr program_;
-    glmCameraPtr camera_;
-    glmSpherePtr sphere_;
-    glmBkgActorPtr bkg_;
-    glmMeshActorPtr mesh_actor_;
-    glm::vec2 render_size_;
+protected:
+    virtual bool createSource(glmMeshRenderer* ren) = 0;
+    glmActor();
+    glmMatrix matrix_;
+    glmMeshRendererList renderers_;
+    bool source_created_ = false;
 };
 
 GLMESH_NAMESPACE_END
 
-#endif
+#endif // __glm_actor_h__
+

@@ -36,15 +36,20 @@
 #include <glmesh/core/glm_mesh.h>
 #include <glmesh/core/glm_mesh_renderer.h>
 #include <glmesh/core/glm_trackball.h>
+#include <glmesh/core/glm_mesh_actor.h>
 #include "ply_reader.h"
 #include "mesh_process.h"
+
+namespace {
+    const QString stUserTitle = "3D mesh surface rendering control window";
+}
 
 MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     :QMainWindow(nullptr, Qt::WindowFlags())
 {
     setMinimumSize(1024, 480);
     ui.setupUi(this);
-    setWindowTitle("3D mesh surface rendering control window");
+    setWindowTitle(stUserTitle);
     
     ren_window_ = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
     ren_window_->setFormat(sf);
@@ -82,7 +87,7 @@ void MainWindow::onMenuItemSlot_ChangeColor(bool checked)
         return;
     QColor color = QColorDialog::getColor(Qt::red, this, "Please choose a color");
     if(color.isValid()){
-        ren_window_->renderer()->setUserColor(glm::vec4(color.redF(), color.greenF(), color.blueF(), 1.0f));
+        ren_window_->renderer()->meshActor()->setUserColor(glm::vec4(color.redF(), color.greenF(), color.blueF(), 1.0f));
         ren_window_->update();
     }
 }
@@ -100,7 +105,7 @@ void MainWindow::onTriangulateToggled(bool toggled)
 void MainWindow::onMenuItemSlot_DM_Points(bool checked)
 {
     if(ren_window_->existMeshData()){
-        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kPoint);
+        ren_window_->renderer()->meshActor()->setDispalyMode(glmesh::glmDisplayMode::kPoint);
         ui.actionDM_Points->setChecked(true);
         ui.actionDM_Wire->setChecked(false);
         ui.actionDM_Facet->setChecked(false);
@@ -110,7 +115,7 @@ void MainWindow::onMenuItemSlot_DM_Points(bool checked)
 void MainWindow::onMenuItemSlot_DM_Facet(bool checked)
 {
     if(ren_window_->existMeshData()){
-        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kFacet);
+        ren_window_->renderer()->meshActor()->setDispalyMode(glmesh::glmDisplayMode::kFacet);
         ui.actionDM_Facet->setChecked(true);
         ui.actionDM_Wire->setChecked(false);
         ui.actionDM_Points->setChecked(false);
@@ -120,7 +125,7 @@ void MainWindow::onMenuItemSlot_DM_Facet(bool checked)
 void MainWindow::onMenuItemSlot_DM_Wire(bool checked)
 {    
     if(ren_window_->existMeshData()){
-        ren_window_->renderer()->setDispalyMode(glmesh::glmDisplayMode::kWire);
+        ren_window_->renderer()->meshActor()->setDispalyMode(glmesh::glmDisplayMode::kWire);
         ui.actionDM_Wire->setChecked(true);
         ui.actionDM_Facet->setChecked(false);
         ui.actionDM_Points->setChecked(false);
@@ -141,7 +146,7 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
     glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
     ply_reader::LoadFile(file_name, *mesh_cloud, false);
     doLoadMeshData(mesh_cloud);
-    auto win_title = windowTitle();
+    auto win_title = stUserTitle;
     win_title.append(QString(" - %1").arg(file_name));
     setWindowTitle(win_title);
 }
