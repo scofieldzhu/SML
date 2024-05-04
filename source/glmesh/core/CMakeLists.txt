@@ -29,7 +29,7 @@ set(EXPORT_HEAD_FILES
 
 set(SOURCE_FILES
     "glad/glad.h"
-    "khrplatform.h"
+    "KHR/khrplatform.h"
     "glad.c"
     "glm_buffer.cpp"
     "glm_mesh_actor.cpp"
