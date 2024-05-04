@@ -65,7 +65,7 @@ uint32_t glmMesh::calcByteSizeOfVertices() const
 
 uint32_t glmMesh::calcByteSizeOfColors() const
 {
-    return sizeof(glmColor) * static_cast<uint32_t>(colors.size());
+    return sizeof(glmClr) * static_cast<uint32_t>(colors.size());
 }
 
 uint32_t glmMesh::calcByteSizeOfNormals() const

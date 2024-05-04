@@ -35,6 +35,7 @@
 #include "glmesh/core/glm_instantiator.h"
 
 GLMESH_NAMESPACE_BEGIN
+
 class GLMESH_API glmSphereActor : public glmActor, public glmInstantiator<glmSphereActor>
 {
 public:
@@ -43,23 +44,23 @@ public:
     uint32_t longitudeResolution() const{ return longi_res_; }
     void setLatitudeResolution(uint32_t res);
     uint32_t latitudeResolution() const{ return latit_res_; }
-    void setCenter(const glm::vec3& center);    
-    const glm::vec3& center() const{ return center_; }
+    void setCenter(const glmPt3& center);    
+    const auto& center() const{ return center_; }
     void setRadius(float radius);
     float radius() const{ return radius_; }
-    void setColor(const glm::vec3& color);
-    const glm::vec3& color() const{ return color_; }
+    void setColor(const glmClr3& color);
+    const auto& color() const{ return color_; }
     void setShaderProgram(glmShaderProgramPtr shader_program);
     glmShaderProgramPtr shaderProgram() const{ return shader_program_; }
     glmSphereActor();
-    glmSphereActor(const glm::vec3& center, float radius);
+    glmSphereActor(const glmPt3& center, float radius);
     ~glmSphereActor();
 
 private:
     bool createSource(glmMeshRenderer* ren) override;
-    glm::vec3 center_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    glmPt3 center_ = glmPt3(0.0f, 0.0f, 0.0f);
     float radius_ = 1.0f;
-    glm::vec3 color_ = glm::vec3(1.0f, 1.0f, 1.0f);
+    glmClr3 color_ = glmClr3(1.0f, 1.0f, 1.0f);
     uint32_t longi_res_ = 180;
     uint32_t latit_res_ = 90;
     glmShaderProgramPtr shader_program_ = nullptr;

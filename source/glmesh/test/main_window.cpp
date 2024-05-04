@@ -40,12 +40,16 @@
 #include "ply_reader.h"
 #include "mesh_process.h"
 
+namespace {
+    const QString stUserTitle = "3D mesh surface rendering control window";
+}
+
 MainWindow::MainWindow(QApplication& app, QSurfaceFormat& sf)
     :QMainWindow(nullptr, Qt::WindowFlags())
 {
     setMinimumSize(1024, 480);
     ui.setupUi(this);
-    setWindowTitle("3D mesh surface rendering control window");
+    setWindowTitle(stUserTitle);
     
     ren_window_ = new RenderWindow(ui.centralwidget, Qt::WindowFlags());
     ren_window_->setFormat(sf);
@@ -142,7 +146,7 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
     glmesh::glmMeshPtr mesh_cloud = std::make_shared<glmesh::glmMesh>();
     ply_reader::LoadFile(file_name, *mesh_cloud, false);
     doLoadMeshData(mesh_cloud);
-    auto win_title = windowTitle();
+    auto win_title = stUserTitle;
     win_title.append(QString(" - %1").arg(file_name));
     setWindowTitle(win_title);
 }

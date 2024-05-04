@@ -54,9 +54,11 @@ using glmPt3 = glm::vec3;
 using glmNormal = glm::vec3;    
 using glmNormalList = std::vector<glmNormal>;
 
-using glmColor = glm::vec4;
-static constexpr size_t kColorTypeSize = sizeof(glmColor);
-using glmColorList = std::vector<glmColor>;
+using glmClr = glm::vec4;
+static constexpr size_t kColorTypeSize = sizeof(glmClr);
+using glmColorList = std::vector<glmClr>;
+
+using glmClr3 = glm::vec3;
 
 using glmTriangleFacet = glm::u32vec3;
 using TriangleFacetList = std::vector<glmTriangleFacet>;

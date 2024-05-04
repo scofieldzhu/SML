@@ -44,6 +44,7 @@ public:
     void setMatrix(const glmMatrix& matrix){ matrix_ = matrix; }
     const auto& matrix() const{ return matrix_; }
     virtual bool addToRenderer(glmMeshRendererPtr ren);
+    bool existRenderer()const;
     virtual void removeFromRenderer(glmMeshRendererPtr ren);
     virtual ~glmActor();
 

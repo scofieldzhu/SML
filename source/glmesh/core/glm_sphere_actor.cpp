@@ -94,7 +94,7 @@ bool glmSphereActor::createSource(glmMeshRenderer* ren)
             pos.y = radius_ * sin(glm::radians((float)t)) * sin(glm::radians((float)p));
             pos.z = radius_ * cos(glm::radians((float)t));
             vertexes_.push_back(pos);
-            glmColor color = {(float)r / (float)latit_res_, 0.5f, 0.5f, 1.0f};
+            glmClr color = {(float)r / (float)latit_res_, 0.5f, 0.5f, 1.0f};
             colors_.push_back(color);
             if(r && c){
                 int cur_idx = longi_res_ * r + c;

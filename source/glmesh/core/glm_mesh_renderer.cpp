@@ -75,7 +75,11 @@ void glmMeshRenderer::loadMeshCloud(glmMeshPtr mesh_cloud)
         mesh_actor_ = glmMeshActor::New(program_);
     }
     mesh_actor_->setMeshCloud(mesh_cloud);
-    mesh_actor_->addToRenderer(shared_from_this());
+    if(mesh_actor_->existRenderer()){
+
+    }else{
+        mesh_actor_->addToRenderer(shared_from_this());
+    }    
 }
 
 bool glmMeshRenderer::initialize(float width, float height)

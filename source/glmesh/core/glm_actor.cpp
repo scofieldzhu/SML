@@ -91,6 +91,11 @@ bool glmActor::addToRenderer(glmMeshRendererPtr ren)
     return true;
 }
 
+bool glmActor::existRenderer() const
+{
+    return !renderers_.empty();
+}
+
 void glmActor::removeFromRenderer(glmMeshRendererPtr ren)
 {
 }
