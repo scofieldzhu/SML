@@ -73,9 +73,13 @@ uint32_t glmMesh::calcByteSizeOfNormals() const
     return sizeof(glmNormal) * static_cast<uint32_t>(normals.size());
 }
 
-uint32_t glmMesh::calcSize() const
+uint32_t glmMesh::calcTotalByteSize() const
 {
-    return calcByteSizeOfVertices() + calcByteSizeOfColors() + calcByteSizeOfNormals();
+    uint32_t total_size = calcByteSizeOfVertices();
+    total_size += calcByteSizeOfColors();
+    total_size += calcByteSizeOfNormals();
+    total_size += calcByteSizeOfFacets();
+    return total_size;
 }
 
 uint32_t glmMesh::calcIndiceCount() const
@@ -92,7 +96,14 @@ uint32_t glmMesh::calcIndiceCount() const
     return count;
 }
 
-glmMemoryBlockPtr glmMesh::allocMemoryOfFacets()
+bool glmMesh::valid() const
+{
+    if(vertices.empty() || vertices.size() > kMaxVertexNumber)
+        return false;
+    return calcByteSizeOfFacets() < glmMesh::kMaxFacetByteSize;
+}
+
+glmMemoryBlockPtr glmMesh::genFacetMemory()
 {
     if(poly_facets.empty()){
         if(triangle_facets.empty()){

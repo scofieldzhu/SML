@@ -52,6 +52,7 @@ inline size_t CalcBytesOfVertexList(const glmVertexList& vl){ return vl.size() *
 using glmPt3 = glm::vec3;
 
 using glmNormal = glm::vec3;    
+static constexpr size_t kNormalTypeSize = kVertexTypeSize;
 using glmNormalList = std::vector<glmNormal>;
 
 using glmClr = glm::vec4;

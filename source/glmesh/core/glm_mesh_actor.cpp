@@ -52,8 +52,6 @@ namespace{
     {glmDisplayMode::kWire, GL_LINE},
     {glmDisplayMode::kFacet, GL_FILL}
   };
-
-  constexpr size_t kMaxGLBufferSize = 50 * 1024 * 1024;
 }
 
 glmMeshActor::glmMeshActor(glmShaderProgramPtr prog)
@@ -66,35 +64,33 @@ glmMeshActor::~glmMeshActor()
     destroy();
 }
 
-void glmMeshActor::setMeshCloud(glmMeshPtr mesh_cloud)
+bool glmMeshActor::setMeshCloud(glmMeshPtr mesh_cloud)
 {
     if(mesh_cloud.get() == cur_mesh_cloud_.get()){
         spdlog::warn("The same mesh cloud has been loaded!");
-        return;
+        return false;
     }
-    cur_mesh_cloud_ = mesh_cloud;
     if(!mesh_cloud->valid()){
         spdlog::warn("Mesh cloud contain a empty vertex list!");
-        return;
+        return false;
     }
+    cur_mesh_cloud_ = mesh_cloud;
+    return true;
 }
 
 void glmMeshActor::updateMeshCloud(glmMeshPtr mesh_cloud)
 {
-
+    if(!setMeshCloud(mesh_cloud)){
+        return;
+    }
+    if(existRenderer()){
+        createSource(renderers_[0].get());
+    }
 }
 
 bool glmMeshActor::createSource(glmMeshRenderer* ren)
 {
-    if(!cur_mesh_cloud_->valid()){
-        spdlog::error("Invalid mesh cloud data!!");
-        return false;
-    }
-    auto mesh_byte_size = cur_mesh_cloud_->calcSize();
-    if(mesh_byte_size > kMaxGLBufferSize){
-        spdlog::error("Too large mesh byte size more than maximum value:{} of GL render!", kMaxGLBufferSize);
-        return false;
-    }
+    auto mesh_byte_size = cur_mesh_cloud_->calcTotalByteSize();
     auto boundingbox = cur_mesh_cloud_->calcBoundingBox();
     glm::vec3 center_point = cur_mesh_cloud_->calcCenterPoint();
     float diagonal_len = boundingbox.calcDiagonalLength();
@@ -106,41 +102,49 @@ bool glmMeshActor::createSource(glmMeshRenderer* ren)
     ren_camera->setFarPlaneDist(ren_camera->eye()[2]);
     ren_camera->setWinAspect(ren->renderSize()[0] / ren->renderSize()[1]);
 
+    if(vao_ == nullptr){
+        vao_ = std::make_shared<glmVertexArray>();
+    }
+    vao_->bindCurrent();
     buffer_ = nullptr; //release old buffer
-    buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
+    if(buffer_ == nullptr){
+        buffer_ = glmBuffer::New(GL_ARRAY_BUFFER);
+        buffer_->allocate(glmMesh::kMaxVertexRelatedByteSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    }
+    vao_->bindBuffer(*buffer_);
+
     uint32_t vbs = cur_mesh_cloud_->calcByteSizeOfVertices();
     uint32_t cbs = cur_mesh_cloud_->calcByteSizeOfColors();
     uint32_t nbs = cur_mesh_cloud_->calcByteSizeOfNormals();
-    uint32_t total_byte_size = vbs + cbs + nbs;
-    buffer_->allocate(total_byte_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-    buffer_->allocateSub(0, vbs, cur_mesh_cloud_->vertices.data());
-    if(cbs)
-        buffer_->allocateSub(vbs, cbs, cur_mesh_cloud_->colors.data());
-    if(nbs)
-        buffer_->allocateSub(vbs + cbs, nbs, cur_mesh_cloud_->normals.data());
-    
-    vao_ = nullptr; //release old vao
-    vao_ = std::make_shared<glmVertexArray>();
-    vao_->bindCurrent();
-    vao_->bindBuffer(*buffer_);
-    
-    indices_buffer_ = nullptr; //release old indices buffer
-    if(cur_mesh_cloud_->existFacetData()){        
-        indices_buffer_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
-        auto indices_data_mb = cur_mesh_cloud_->allocMemoryOfFacets();
-        indices_buffer_->allocate(static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData(), GL_DYNAMIC_STORAGE_BIT);
-        vao_->bindBuffer(*indices_buffer_);
-    }
-    vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+    int32_t current_offset = 0;
+    buffer_->allocateSub(current_offset, vbs, cur_mesh_cloud_->vertices.data());
+    vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(current_offset));
     vao_->getAttrib(0)->enable();
-    if(!cur_mesh_cloud_->colors.empty()){              
-        vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs));
+    current_offset += vbs;
+    if(cbs){
+        buffer_->allocateSub(current_offset, cbs, cur_mesh_cloud_->colors.data());
+        vao_->getAttrib(1)->setPointer(4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(current_offset));
         vao_->getAttrib(1)->enable();
     }
-    if(!cur_mesh_cloud_->normals.empty()){       
-        vao_->getAttrib(2)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vbs + cbs));
+    current_offset += cbs;
+    if(nbs){
+        buffer_->allocateSub(current_offset, nbs, cur_mesh_cloud_->normals.data());
+        vao_->getAttrib(2)->setPointer(3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(current_offset));
         vao_->getAttrib(2)->enable();
-    }    
+    }
+    current_offset += nbs;
+    
+    if(indices_buffer_ == nullptr){
+        indices_buffer_ = glmBuffer::New(GL_ELEMENT_ARRAY_BUFFER);
+        indices_buffer_->allocate(glmMesh::kMaxFacetByteSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    }
+    if(cur_mesh_cloud_->existFacetData()){        
+        auto indices_data_mb = cur_mesh_cloud_->genFacetMemory();
+        indices_buffer_->allocateSub(0, static_cast<uint32_t>(indices_data_mb->size()), indices_data_mb->blockData());
+        vao_->bindBuffer(*indices_buffer_);
+    }else{
+        vao_->unbindBuffer(*indices_buffer_);
+    }
     return true;
 }
 

@@ -40,15 +40,22 @@ GLMESH_NAMESPACE_BEGIN
 struct GLMESH_API glmMesh : public glmInstantiator<glmMesh>
 {
     static constexpr glmIndex kPolyRestartIndex = 0xFFFFFFFF;    
-    bool valid()const{ return !vertices.empty(); }
-    glmMemoryBlockPtr allocMemoryOfFacets();
+    static constexpr size_t kMaxVertexNumber = 1e5;
+    static constexpr size_t kMaxFacetNumber = 1e6;
+    static constexpr size_t kMaxVertexNumberOfPolyFacet = 6;
+    static constexpr size_t kMaxFacetByteSize = kMaxFacetNumber * (kMaxVertexNumberOfPolyFacet + 1) * kIndexTypeSize;
+    static constexpr size_t kMaxVertexRelatedByteSize = (kVertexTypeSize + kColorTypeSize + kNormalTypeSize) * kMaxVertexNumber;
+    static constexpr size_t kMaxMeshByteSize = kMaxVertexRelatedByteSize + kMaxFacetByteSize;
+    bool valid()const;
+    glmMemoryBlockPtr genFacetMemory();
     glmBoundingBox calcBoundingBox()const;
     glm::vec3 calcCenterPoint()const;
     uint32_t calcByteSizeOfVertices()const; 
     uint32_t calcByteSizeOfColors()const; 
     uint32_t calcByteSizeOfNormals()const; 
-    uint32_t calcSize()const;
+    uint32_t calcTotalByteSize()const;
     uint32_t calcIndiceCount()const;
+    uint32_t calcByteSizeOfFacets()const{ return calcIndiceCount() * kIndexTypeSize; }
     bool isTriangulated()const{ return !triangle_facets.empty(); }
     bool existFacetData()const{ return triangle_facets.size() || poly_facets.size(); }
     glmVertexList vertices;
