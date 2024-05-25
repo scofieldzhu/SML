@@ -27,6 +27,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 #include "glm_camera.h"
 #include <glm/gtx/transform.hpp>
 #include "glm_shader_program.h"

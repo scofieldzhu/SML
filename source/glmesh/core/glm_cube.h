@@ -4,7 +4,7 @@
  *  It reduces the amount of OpenGL code required for rendering and facilitates 
  *  coherent OpenGL.
  *  
- *  File: glm_actor.h 
+ *  File: glm_cube.h 
  *  Copyright (c) 2024-2024 scofieldzhu
  *  
  *  MIT License
@@ -28,36 +28,28 @@
  *  SOFTWARE.
  */
 
-#ifndef __glm_actor_h__
-#define __glm_actor_h__
+#ifndef __glm_cube_h__
+#define __glm_cube_h__
 
-#include "glmesh/core/glm_base_type.h"
-#include "glmesh/core/glm_export.h"
-#include "glmesh/core/glm_instantiator.h"
+#include "glm_actor.h"
 
 GLMESH_NAMESPACE_BEGIN
 
-class GLMESH_API glmActor
+class GLMESH_API glmCube : public glmActor, public glmInstantiator<glmCube>
 {
 public:
-    virtual void draw(glmMeshRenderer* ren) = 0;        
-    const glmMeshRendererList& renderers()const{ return renderers_; }
-    void setMatrix(const glmMatrix& matrix){ matrix_ = matrix; }
-    const auto& matrix() const{ return matrix_; }
-    virtual bool addToRenderer(glmMeshRendererPtr ren);
-    bool existRenderer()const;
-    virtual void removeFromRenderer(glmMeshRendererPtr ren);
-    virtual ~glmActor();
+    void draw(glmMeshRenderer* ren) override;
+    glmCube();
+    ~glmCube();
 
-protected:
-    virtual bool createSource(glmMeshRenderer* ren) = 0;
-    glmActor();
-    glmMatrix matrix_;
-    glmMeshRendererList renderers_;
-    bool source_created_ = false;
+private:
+    bool createSource(glmMeshRenderer* ren) override;
+    glmVertexArrayPtr vao_;
+    glmShaderProgramPtr prog_;
+    glmBufferPtr vbo_;
+
 };
 
 GLMESH_NAMESPACE_END
 
-#endif // __glm_actor_h__
-
+#endif

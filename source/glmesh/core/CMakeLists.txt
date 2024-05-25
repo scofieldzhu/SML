@@ -23,6 +23,7 @@ set(EXPORT_HEAD_FILES
     "glm_vertex_array.h"
     "glm_vertex_array_attrib.h"
     "glm_win_event.h"
+    "glm_cube.h"
     "glm_win_event_handler.h"
     "glm_win_event_handler_publisher.h"
 )
@@ -32,6 +33,7 @@ set(SOURCE_FILES
     "KHR/khrplatform.h"
     "glad.c"
     "glm_buffer.cpp"
+    "glm_cube.cpp"
     "glm_mesh_actor.cpp"
     "glm_actor.cpp"
     "glm_memory_block.cpp"
