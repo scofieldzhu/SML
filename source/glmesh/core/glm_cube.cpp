@@ -32,6 +32,8 @@
 #include "glad/glad.h"
 #include "glm_vertex_array.h"
 #include "glm_buffer.h"
+#include "glm_shader_program.h"
+#include "glm_shader_source.h"
 
 GLMESH_NAMESPACE_BEGIN
 
@@ -98,12 +100,12 @@ bool glmCube::createSource(glmMeshRenderer *ren)
     vbo_->allocate(sizeof(vertice_data), vertice_data, GL_STATIC_DRAW);
     vao_->getAttrib(0)->setPointer(3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), BUFFER_OFFSET(0));
     vao_->getAttrib(0)->enable();
-
-    return false;
+    prog_ = glmShaderProgram::New();
+    prog_->addShaderSource(ShaderSource::kCubeVertexShaderSource, GL_VERTEX_SHADER);
+    prog_->addShaderSource(ShaderSource::kCubeFragmentShaderSource, GL_FRAGMENT_SHADER);
+    prog_->link();
+    prog_->use();
+    return true;
 }
 
-
-
 GLMESH_NAMESPACE_END
-
-

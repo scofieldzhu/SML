@@ -50,12 +50,22 @@ set(SOURCE_FILES
     "glm_vertex_array_attrib.cpp"
     "glm_vertex_array.cpp"
     "glm_win_event_handler_publisher.cpp"
+    "glm_shader_source.h"
+    "glm_shader_source.h.in"
+    "shader.vert"
+    "shader.frag"
+    "bkg_shader.vert"
+    "bkg_shader.frag"
+    "cube.vert"
+    "cube.frag"
 )
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/shader.vert" VERTEX_SHADER_SOURCE)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/bkg_shader.vert" BKG_VERTEX_SHADER_SOURCE)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cube.vert" CUBE_VERTEX_SHADER_SOURCE)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/shader.frag" FRAGMENT_SHADER_SOURCE)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/bkg_shader.frag" BKG_FRAGMENT_SHADER_SOURCE)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cube.frag" CUBE_FRAGMENT_SHADER_SOURCE)
 
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/glm_shader_source.h.in"

@@ -46,6 +46,18 @@ void main()
     gl_Position = vec4(vertex_pos, 1.0);
     out_color = vertex_color;
 })";
+    static const char* kCubeVertexShaderSource = R"(#version 400 core
+
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+	gl_Position = projection * view * model * vec4(aPos, 1.0);
+})";
     static const char* kFragmentShaderSource = R"(#version 450 core
 
 in vec4 out_color;
@@ -66,4 +78,15 @@ void main()
     frag_color = vec4(out_color, 1.0);
 }
 )";
+    static const char* kCubeFragmentShaderSource = R"(#version 450 core
+
+out vec4 FragColor;
+  
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+
+void main()
+{
+    FragColor = vec4(lightColor * objectColor, 1.0);
+})";
 }

@@ -136,7 +136,7 @@ void MainWindow::onMenuItemSlot_LoadMeshData(bool checked)
 {
     spdlog::info("Load mesh data");
     QString mesh_dir = last_mesh_dir_.isEmpty() ? QCoreApplication::applicationDirPath() : last_mesh_dir_;
-    std::string  utf8_str = "F:/BaiduNetdiskDownload/牙齿模型";
+    std::string  utf8_str = "D:\\Install\\Data\\牙齿模型";
     mesh_dir = QString::fromUtf8(reinterpret_cast<const char*>(utf8_str.c_str()));
     QString file_name = QFileDialog::getOpenFileName(this, "Open file", mesh_dir, "PLY files (*.ply)");
     if(file_name.isEmpty()){
